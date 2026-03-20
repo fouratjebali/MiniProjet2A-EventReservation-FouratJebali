@@ -1,0 +1,26 @@
+webauthn:
+    credential_repository: App\Repository\WebauthnCredentialRepository
+    user_repository: App\Repository\UserRepository
+    
+    creation_profiles:
+        default:
+            rp:
+                name: '%env(WEBAUTHN_RP_NAME)%'
+                id: '%env(APP_DOMAIN)%'
+            challenge_length: 32
+            timeout: 60000
+            authenticator_selection:
+                user_verification: preferred
+                resident_key: preferred
+                authenticator_attachment: ~
+            attestation: none
+            pub_key_cred_params:
+                - !php/const Cose\Algorithms::COSE_ALGORITHM_ES256
+                - !php/const Cose\Algorithms::COSE_ALGORITHM_RS256
+    
+    request_profiles:
+        default:
+            rp_id: '%env(APP_DOMAIN)%'
+            challenge_length: 32
+            timeout: 60000
+            user_verification: preferred
