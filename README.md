@@ -31,21 +31,26 @@ Application Symfony permettant aux utilisateurs de réserver des événements en
 
 2. **Lancer Docker**
 ```bash
-   docker-compose up -d
+   docker compose up -d
 ```
 
 3. **Installer les dépendances**
 ```bash
-   docker-compose exec php composer install
+   docker compose exec php composer install
 ```
 
 4. **Créer la base de données**
 ```bash
-   docker-compose exec php php bin/console doctrine:migrations:migrate
-   docker-compose exec php php bin/console doctrine:fixtures:load
+   docker compose exec php php bin/console doctrine:migrations:migrate
+   docker compose exec php php bin/console doctrine:fixtures:load
 ```
 
-5. **Accéder à l'application**
+5. **Générer les clés JWT**
+```bash
+   docker compose exec php php bin/console lexik:jwt:generate-keypair
+```
+
+6. **Accéder à l'application**
    - Frontend: http://localhost:8080
    - Admin: admin@event.com / admin123
 
