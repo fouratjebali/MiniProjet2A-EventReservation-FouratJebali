@@ -9,12 +9,12 @@ webauthn:
                 id: '%env(APP_DOMAIN)%'
             challenge_length: 32
             timeout: 60000
-            authenticator_selection:
+            authenticator_selection_criteria:
                 user_verification: preferred
                 resident_key: preferred
                 authenticator_attachment: ~
-            attestation: none
-            pub_key_cred_params:
+            attestation_conveyance: none
+            public_key_credential_parameters:
                 - !php/const Cose\Algorithms::COSE_ALGORITHM_ES256
                 - !php/const Cose\Algorithms::COSE_ALGORITHM_RS256
     
