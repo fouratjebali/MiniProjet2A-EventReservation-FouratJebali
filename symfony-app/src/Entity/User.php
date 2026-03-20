@@ -2,12 +2,17 @@
 
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use App\Repository\UserRepository;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Uid\Uuid;
+use Webauthn\PublicKeyCredentialUserEntity;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -24,9 +29,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private string $password;
 
+    #[ORM\OneToMany(
+        mappedBy: 'user',
+        targetEntity: WebauthnCredential::class,
+        cascade: ['persist', 'remove'],
+        orphanRemoval: true
+    )]
+    private Collection $webauthnCredentials;
+
     public function __construct()
     {
         $this->id = self::generateUuid();
+        $this->webauthnCredentials = new ArrayCollection();
     }
 
     public function getId(): string
@@ -80,7 +94,40 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        
+    }
+
+    /**
+     * @return Collection<int, WebauthnCredential>
+     */
+    public function getWebauthnCredentials(): Collection
+    {
+        return $this->webauthnCredentials;
+    }
+
+    public function addWebauthnCredential(WebauthnCredential $credential): static
+    {
+        if (!$this->webauthnCredentials->contains($credential)) {
+            $this->webauthnCredentials->add($credential);
+            $credential->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeWebauthnCredential(WebauthnCredential $credential): static
+    {
+        $this->webauthnCredentials->removeElement($credential);
+
+        return $this;
+    }
+
+    public function toPublicKeyCredentialUserEntity(): PublicKeyCredentialUserEntity
+    {
+        return new PublicKeyCredentialUserEntity(
+            $this->email,
+            Uuid::fromString($this->id)->toBinary(),
+            $this->email
+        );
     }
 
     private static function generateUuid(): string
