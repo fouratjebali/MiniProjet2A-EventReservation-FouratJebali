@@ -1,0 +1,9 @@
+gesdinet_jwt_refresh_token:
+    ttl: 2592000  # 30 jours
+    ttl_update: true
+    user_provider: security.user.provider.concrete.app_user_provider
+    single_use: true
+    token_parameter_name: refresh_token
+    firewall: api
+    refresh_token_class: Gesdinet\JWTRefreshTokenBundle\Entity\RefreshToken
+    doctrine_mappings: true
