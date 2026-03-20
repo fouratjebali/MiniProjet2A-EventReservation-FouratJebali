@@ -28,12 +28,6 @@ final class Version20260319121851 extends AbstractMigration
         $this->addSql('CREATE TABLE "user" (id VARCHAR(36) NOT NULL, email VARCHAR(180) NOT NULL, roles JSON NOT NULL, password VARCHAR(255) NOT NULL, PRIMARY KEY (id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_8D93D649E7927C74 ON "user" (email)');
         $this->addSql('ALTER TABLE reservations ADD CONSTRAINT FK_4DA23971F7E88B FOREIGN KEY (event_id) REFERENCES events (id) NOT DEFERRABLE');
-        $this->addSql('CREATE TABLE refresh_tokens (
-            id SERIAL PRIMARY KEY,
-            refresh_token VARCHAR(128) NOT NULL UNIQUE,
-            username VARCHAR(255) NOT NULL,
-            valid TIMESTAMP NOT NULL
-        )');
     }
 
     public function down(Schema $schema): void
@@ -44,6 +38,5 @@ final class Version20260319121851 extends AbstractMigration
         $this->addSql('DROP TABLE events');
         $this->addSql('DROP TABLE reservations');
         $this->addSql('DROP TABLE "user"');
-        $this->addSql('DROP TABLE refresh_tokens');
     }
 }
