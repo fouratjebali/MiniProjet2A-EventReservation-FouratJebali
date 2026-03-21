@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Authentification</title>
+    <style>
+        :root {
+            --bg: #f3efe6;
+            --panel: #fffaf2;
+            --border: #d8c8a8;
+            --text: #1d2a2f;
+            --accent: #0e6b5c;
+            --accent-hover: #0a574b;
+            --error-bg: #fbe4e4;
+            --error-text: #8a1f1f;
+            --success-bg: #ddeee4;
+            --success-text: #185a32;
+        }
+
+        body {
+            margin: 0;
+            font-family: Georgia, "Times New Roman", serif;
+            background:
+                radial-gradient(circle at top left, rgba(14, 107, 92, 0.12), transparent 35%),
+                linear-gradient(180deg, #f8f3e9 0%, var(--bg) 100%);
+            color: var(--text);
+        }
+
+        .page {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 32px 20px 56px;
+        }
+
+        h1 {
+            margin-bottom: 8px;
+            font-size: clamp(2rem, 4vw, 3rem);
+            letter-spacing: 0.02em;
+        }
+
+        .intro {
+            margin-bottom: 24px;
+            color: #4b5d61;
+        }
+
+        .section {
+            margin: 24px 0;
+            padding: 20px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: rgba(255, 250, 242, 0.92);
+            box-shadow: 0 12px 32px rgba(37, 44, 43, 0.08);
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 16px;
+            color: var(--accent);
+            border-bottom: 2px solid rgba(14, 107, 92, 0.2);
+            padding-bottom: 10px;
+        }
+
+        input,
+        button {
+            margin: 6px 0;
+            padding: 12px 14px;
+            width: 100%;
+            box-sizing: border-box;
+            border-radius: 10px;
+            font-size: 1rem;
+        }
+
+        input {
+            border: 1px solid #cdbd9a;
+            background: #fffefb;
+        }
+
+        button {
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background: var(--accent-hover);
+        }
+
+        .status {
+            margin-top: 16px;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .success {
+            color: var(--success-text);
+            background: var(--success-bg);
+        }
+
+        .error {
+            color: var(--error-text);
+            background: var(--error-bg);
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-family: "Courier New", monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1>Test Authentification JWT + Passkeys</h1>
+        <p class="intro">Cette page permet de tester les endpoints JWT, refresh token et WebAuthn de l'application Symfony.</p>
+
+        <div class="section">
+            <h2>1. Inscription classique</h2>
+            <input type="email" id="regEmail" placeholder="Email">
+            <input type="password" id="regPassword" placeholder="Mot de passe">
+            <button onclick="register()">S'inscrire</button>
+            <div id="regResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>2. Connexion classique</h2>
+            <input type="email" id="loginEmail" placeholder="Email">
+            <input type="password" id="loginPassword" placeholder="Mot de passe">
+            <button onclick="login()">Se connecter</button>
+            <div id="loginResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>3. Enregistrer une passkey</h2>
+            <input type="email" id="passkeyRegEmail" placeholder="Email">
+            <button onclick="registerPasskey()">Enregistrer passkey</button>
+            <div id="passkeyRegResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>4. Connexion avec passkey</h2>
+            <button onclick="loginWithPasskey()">Se connecter avec passkey</button>
+            <div id="passkeyLoginResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>5. Tester /api/auth/me</h2>
+            <button onclick="testProtectedAPI()">Tester /me</button>
+            <div id="apiResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>6. Rafraichir le token</h2>
+            <button onclick="refreshToken()">Rafraichir</button>
+            <div id="refreshResult"></div>
+        </div>
+
+        <div class="section">
+            <h2>7. Deconnexion</h2>
+            <button onclick="logout()">Se deconnecter</button>
+            <div id="logoutResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = `${window.location.origin}/api`;
+        let currentToken = null;
+        let currentRefreshToken = null;
+
+        function base64ToUint8Array(base64) {
+            const binary = atob(base64);
+            return Uint8Array.from(binary, char => char.charCodeAt(0));
+        }
+
+        function bufferToBase64(buffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(buffer)));
+        }
+
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            const container = document.createElement('div');
+            const pre = document.createElement('pre');
+
+            container.className = `status ${isError ? 'error' : 'success'}`;
+            pre.textContent = JSON.stringify(data, null, 2);
+            container.appendChild(pre);
+
+            element.innerHTML = '';
+            element.appendChild(container);
+        }
+
+        async function apiRequest(url, method = 'GET', body = null, useAuth = false) {
+            const headers = {};
+
+            if (body !== null) {
+                headers['Content-Type'] = 'application/json';
+            }
+
+            if (useAuth && currentToken) {
+                headers.Authorization = `Bearer ${currentToken}`;
+            }
+
+            const options = { method, headers };
+
+            if (body !== null) {
+                options.body = JSON.stringify(body);
+            }
+
+            const response = await fetch(url, options);
+            const rawText = await response.text();
+
+            let data;
+            try {
+                data = rawText ? JSON.parse(rawText) : {};
+            } catch (error) {
+                data = { error: 'Reponse non JSON', raw: rawText };
+            }
+
+            if (!response.ok) {
+                throw data;
+            }
+
+            if (data.token) {
+                currentToken = data.token;
+                localStorage.setItem('jwt_token', data.token);
+            }
+
+            if (data.refresh_token) {
+                currentRefreshToken = data.refresh_token;
+                localStorage.setItem('refresh_token', data.refresh_token);
+            }
+
+            return data;
+        }
+
+        async function register() {
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const data = await apiRequest(`${API_BASE}/auth/register`, 'POST', { email, password });
+                showResult('regResult', data);
+            } catch (error) {
+                showResult('regResult', error, true);
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const data = await apiRequest(`${API_BASE}/auth/login`, 'POST', { email, password });
+                showResult('loginResult', data);
+            } catch (error) {
+                showResult('loginResult', error, true);
+            }
+        }
+
+        async function registerPasskey() {
+            const email = document.getElementById('passkeyRegEmail').value;
+
+            if (!window.PublicKeyCredential) {
+                showResult('passkeyRegResult', { error: 'WebAuthn non supporte par ce navigateur' }, true);
+                return;
+            }
+
+            try {
+                const options = await apiRequest(`${API_BASE}/auth/passkey/register/options`, 'POST', { email });
+
+                const credential = await navigator.credentials.create({
+                    publicKey: {
+                        ...options,
+                        challenge: base64ToUint8Array(options.challenge),
+                        user: {
+                            ...options.user,
+                            id: base64ToUint8Array(options.user.id)
+                        },
+                        excludeCredentials: (options.excludeCredentials || []).map(cred => ({
+                            ...cred,
+                            id: base64ToUint8Array(cred.id)
+                        }))
+                    }
+                });
+
+                const credentialData = {
+                    id: credential.id,
+                    rawId: bufferToBase64(credential.rawId),
+                    type: credential.type,
+                    response: {
+                        clientDataJSON: bufferToBase64(credential.response.clientDataJSON),
+                        attestationObject: bufferToBase64(credential.response.attestationObject)
+                    }
+                };
+
+                const result = await apiRequest(`${API_BASE}/auth/passkey/register/verify`, 'POST', {
+                    email,
+                    credential: credentialData
+                });
+
+                showResult('passkeyRegResult', result);
+            } catch (error) {
+                showResult('passkeyRegResult', error, true);
+            }
+        }
+
+        async function loginWithPasskey() {
+            if (!window.PublicKeyCredential) {
+                showResult('passkeyLoginResult', { error: 'WebAuthn non supporte' }, true);
+                return;
+            }
+
+            try {
+                const options = await apiRequest(`${API_BASE}/auth/passkey/login/options`, 'POST');
+
+                const assertion = await navigator.credentials.get({
+                    publicKey: {
+                        ...options,
+                        challenge: base64ToUint8Array(options.challenge),
+                        allowCredentials: (options.allowCredentials || []).map(cred => ({
+                            ...cred,
+                            id: base64ToUint8Array(cred.id)
+                        }))
+                    }
+                });
+
+                const credentialData = {
+                    id: assertion.id,
+                    rawId: bufferToBase64(assertion.rawId),
+                    type: assertion.type,
+                    response: {
+                        clientDataJSON: bufferToBase64(assertion.response.clientDataJSON),
+                        authenticatorData: bufferToBase64(assertion.response.authenticatorData),
+                        signature: bufferToBase64(assertion.response.signature),
+                        userHandle: assertion.response.userHandle
+                            ? bufferToBase64(assertion.response.userHandle)
+                            : null
+                    }
+                };
+
+                const result = await apiRequest(`${API_BASE}/auth/passkey/login/verify`, 'POST', {
+                    credential: credentialData
+                });
+
+                showResult('passkeyLoginResult', result);
+            } catch (error) {
+                showResult('passkeyLoginResult', error, true);
+            }
+        }
+
+        async function testProtectedAPI() {
+            try {
+                const data = await apiRequest(`${API_BASE}/auth/me`, 'GET', null, true);
+                showResult('apiResult', data);
+            } catch (error) {
+                showResult('apiResult', error, true);
+            }
+        }
+
+        async function refreshToken() {
+            try {
+                const data = await apiRequest(`${API_BASE}/token/refresh`, 'POST', {
+                    refresh_token: currentRefreshToken || localStorage.getItem('refresh_token')
+                });
+                showResult('refreshResult', data);
+            } catch (error) {
+                showResult('refreshResult', error, true);
+            }
+        }
+
+        async function logout() {
+            try {
+                const data = await apiRequest(`${API_BASE}/auth/logout`, 'POST', {
+                    refresh_token: currentRefreshToken || localStorage.getItem('refresh_token')
+                }, true);
+
+                currentToken = null;
+                currentRefreshToken = null;
+                localStorage.removeItem('jwt_token');
+                localStorage.removeItem('refresh_token');
+
+                showResult('logoutResult', data);
+            } catch (error) {
+                showResult('logoutResult', error, true);
+            }
+        }
+
+        window.onload = function () {
+            currentToken = localStorage.getItem('jwt_token');
+            currentRefreshToken = localStorage.getItem('refresh_token');
+        };
+    </script>
+</body>
+</html>
