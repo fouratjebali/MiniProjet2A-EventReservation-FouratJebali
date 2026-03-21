@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\PasskeyAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -27,6 +28,7 @@ class AuthController extends AbstractController
         private RefreshTokenGeneratorInterface $refreshTokenGenerator,
         private EntityManagerInterface $entityManager,
         private UserPasswordHasherInterface $passwordHasher,
+        private PasskeyAuthService $passkeyService,
         private UserRepository $userRepository,
         private ValidatorInterface $validator
     ) {
@@ -154,5 +156,82 @@ class AuthController extends AbstractController
             'success' => true,
             'message' => 'Deconnexion reussie',
         ]);
+    }
+
+    #[Route('/passkey/register/options', name: 'passkey_register_options', methods: ['POST'])]
+    public function passkeyRegisterOptions(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $email = $data['email'] ?? null;
+
+        if (!$email) {
+            return $this->json([
+                'error' => 'Email requis',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+
+        if (!$user) {
+            $user = new User();
+            $user->setEmail($email);
+            $user->setPassword(
+                $this->passwordHasher->hashPassword($user, bin2hex(random_bytes(32)))
+            );
+
+            $errors = $this->validator->validate($user);
+            if (count($errors) > 0) {
+                return $this->json([
+                    'error' => 'Donnees invalides',
+                    'details' => (string) $errors,
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
+        }
+
+        try {
+            $options = $this->passkeyService->getRegistrationOptions($user);
+
+            return $this->json([
+                'rp' => [
+                    'name' => $options->rp->name,
+                    'id' => $options->rp->id,
+                ],
+                'user' => [
+                    'id' => base64_encode($options->user->id),
+                    'name' => $options->user->name,
+                    'displayName' => $options->user->displayName,
+                ],
+                'challenge' => base64_encode($options->challenge),
+                'pubKeyCredParams' => array_map(
+                    static fn ($param) => [
+                        'type' => $param->type,
+                        'alg' => $param->alg,
+                    ],
+                    $options->pubKeyCredParams
+                ),
+                'timeout' => $options->timeout,
+                'excludeCredentials' => array_map(
+                    static fn ($cred) => [
+                        'type' => $cred->type,
+                        'id' => base64_encode($cred->id),
+                    ],
+                    $options->excludeCredentials
+                ),
+                'authenticatorSelection' => [
+                    'authenticatorAttachment' => $options->authenticatorSelection?->authenticatorAttachment,
+                    'residentKey' => $options->authenticatorSelection?->residentKey,
+                    'userVerification' => $options->authenticatorSelection?->userVerification,
+                ],
+                'attestation' => $options->attestation,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Erreur lors de la generation des options',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 }
