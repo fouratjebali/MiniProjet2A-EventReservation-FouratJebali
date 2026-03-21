@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Repository;
 
 use App\Entity\User;
@@ -7,9 +8,10 @@ use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordUpgraderInterface;
 use Symfony\Component\Uid\Uuid;
+use Webauthn\Bundle\Repository\PublicKeyCredentialUserEntityRepositoryInterface;
 use Webauthn\PublicKeyCredentialUserEntity;
 
-class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface
+class UserRepository extends ServiceEntityRepository implements PasswordUpgraderInterface, PublicKeyCredentialUserEntityRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -27,15 +29,24 @@ class UserRepository extends ServiceEntityRepository implements PasswordUpgrader
         $this->getEntityManager()->flush();
     }
 
-    public function findOneByUserHandle(string $userHandle): ?User
+    public function findOneByUsername(string $username): ?PublicKeyCredentialUserEntity
+    {
+        $user = $this->findOneBy(['email' => $username]);
+
+        return $user?->toPublicKeyCredentialUserEntity();
+    }
+
+    public function findOneByUserHandle(string $userHandle): ?PublicKeyCredentialUserEntity
     {
         $userId = Uuid::fromBinary($userHandle)->toRfc4122();
 
-        return $this->createQueryBuilder('u')
+        $user = $this->createQueryBuilder('u')
             ->where('u.id = :userId')
             ->setParameter('userId', $userId)
             ->getQuery()
             ->getOneOrNullResult();
+
+        return $user?->toPublicKeyCredentialUserEntity();
     }
 
     public function createUserEntity(PublicKeyCredentialUserEntity $userEntity): User

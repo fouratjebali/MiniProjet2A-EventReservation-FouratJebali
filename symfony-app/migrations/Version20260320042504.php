@@ -22,13 +22,13 @@ final class Version20260320042504 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->addSql(<<<'SQL'
             CREATE TABLE webauthn_credentials (
-              id UUID NOT NULL,
+              id VARCHAR(36) NOT NULL,
               credential_data TEXT NOT NULL,
               name VARCHAR(255) NOT NULL,
               created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
               last_used_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL,
               credential_id VARCHAR(255) NOT NULL,
-              user_id UUID NOT NULL,
+              user_id VARCHAR(36) NOT NULL,
               PRIMARY KEY (id)
             )
         SQL);

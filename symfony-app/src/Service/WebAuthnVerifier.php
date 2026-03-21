@@ -108,7 +108,7 @@ class WebAuthnVerifier
         }
 
         $credentialId = base64_encode($this->decodeBase64Value($credentialData['rawId']));
-        $credential = $this->credentialRepo->findByCredentialId($credentialId);
+        $credential = $this->credentialRepo->findCredentialEntityByCredentialId($credentialId);
 
         if (!$credential) {
             throw new \RuntimeException('Credential non trouve');

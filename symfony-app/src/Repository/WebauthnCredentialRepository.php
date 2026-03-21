@@ -7,9 +7,11 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Symfony\Component\Uid\Uuid;
+use Webauthn\Bundle\Repository\PublicKeyCredentialSourceRepositoryInterface;
 use Webauthn\PublicKeyCredentialSource;
+use Webauthn\PublicKeyCredentialUserEntity;
 
-class WebauthnCredentialRepository extends ServiceEntityRepository
+class WebauthnCredentialRepository extends ServiceEntityRepository implements PublicKeyCredentialSourceRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -29,7 +31,7 @@ class WebauthnCredentialRepository extends ServiceEntityRepository
         return $credential;
     }
 
-    public function findByCredentialId(string $credentialId): ?WebauthnCredential
+    public function findCredentialEntityByCredentialId(string $credentialId): ?WebauthnCredential
     {
         return $this->findOneBy(['credentialId' => $credentialId]);
     }
@@ -39,9 +41,14 @@ class WebauthnCredentialRepository extends ServiceEntityRepository
         return $this->findBy(['user' => $user], ['createdAt' => 'DESC']);
     }
 
-    public function findOneByPublicKeyCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    public function findAllForUserEntity(PublicKeyCredentialUserEntity $publicKeyCredentialUserEntity): array
     {
-        $credential = $this->findByCredentialId(base64_encode($publicKeyCredentialId));
+        return $this->findAllByUserHandle($publicKeyCredentialUserEntity->id);
+    }
+
+    public function findOneByCredentialId(string $publicKeyCredentialId): ?PublicKeyCredentialSource
+    {
+        $credential = $this->findCredentialEntityByCredentialId(base64_encode($publicKeyCredentialId));
         
         return $credential ? $credential->getCredentialSource() : null;
     }
@@ -65,7 +72,7 @@ class WebauthnCredentialRepository extends ServiceEntityRepository
 
     public function saveCredentialSource(PublicKeyCredentialSource $source): void
     {
-        $credential = $this->findByCredentialId(
+        $credential = $this->findCredentialEntityByCredentialId(
             base64_encode($source->getPublicKeyCredentialId())
         );
 
