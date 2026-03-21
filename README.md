@@ -86,6 +86,113 @@ Application Symfony permettant aux utilisateurs de réserver des événements en
    docker-compose exec php php bin/console doctrine:migrations:migrate
 ```
 
+## 🔌 API Endpoints
+
+### Authentification
+
+#### Registration classique
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+#### Login classique
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+#### Informations utilisateur
+```http
+GET /api/auth/me
+Authorization: Bearer {token}
+```
+
+#### Refresh token
+```http
+POST /api/token/refresh
+Content-Type: application/json
+
+{
+  "refresh_token": "{refresh_token}"
+}
+```
+
+#### Logout
+```http
+POST /api/auth/logout
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "refresh_token": "{refresh_token}"
+}
+```
+
+### Passkeys (WebAuthn)
+
+#### Enregistrer une passkey - Options
+```http
+POST /api/auth/passkey/register/options
+Content-Type: application/json
+
+{
+  "email": "user@example.com"
+}
+```
+
+#### Enregistrer une passkey - Vérification
+```http
+POST /api/auth/passkey/register/verify
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "credential": {credential_object}
+}
+```
+
+#### Login avec passkey - Options
+```http
+POST /api/auth/passkey/login/options
+```
+
+#### Login avec passkey - Vérification
+```http
+POST /api/auth/passkey/login/verify
+Content-Type: application/json
+
+{
+  "credential": {credential_object}
+}
+```
+
+## 🧪 Tests
+
+### Tests unitaires
+```bash
+# Tous les tests
+docker-compose exec php php bin/phpunit
+
+# Tests spécifiques
+docker-compose exec php php bin/phpunit tests/Controller/AuthControllerTest.php
+docker-compose exec php php bin/phpunit tests/Service/PasskeyAuthServiceTest.php
+```
+
+### Tests manuels
+Accéder à http://localhost:8080/test-auth.html pour tester l'authentification dans le navigateur.
+
+
 ## 🚀 Lancement
 (À compléter)
 
@@ -94,6 +201,7 @@ Application Symfony permettant aux utilisateurs de réserver des événements en
 - [x] Configuration Docker
 - [x] Entités & Base de données
 - [x] Authentification JWT/Passkeys
+- [x] API Authentication (Register, Login, Passkeys)
 - [ ] CRUD Événements
 - [ ] Interface utilisateur
 - [ ] Tests
