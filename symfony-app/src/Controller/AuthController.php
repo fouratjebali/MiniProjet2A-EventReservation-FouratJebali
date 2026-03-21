@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use App\Service\PasskeyAuthService;
+use App\Service\WebAuthnVerifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Gesdinet\JWTRefreshTokenBundle\Generator\RefreshTokenGeneratorInterface;
 use Gesdinet\JWTRefreshTokenBundle\Model\RefreshTokenManagerInterface;
@@ -232,6 +233,118 @@ class AuthController extends AbstractController
                 'error' => 'Erreur lors de la generation des options',
                 'message' => $e->getMessage(),
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/passkey/register/verify', name: 'passkey_register_verify', methods: ['POST'])]
+    public function passkeyRegisterVerify(Request $request, WebAuthnVerifier $verifier): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $email = $data['email'] ?? null;
+        $credential = $data['credential'] ?? null;
+
+        if (!$email || !is_array($credential)) {
+            return $this->json([
+                'error' => 'Email et credential requis',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $user = $this->userRepository->findOneBy(['email' => $email]);
+        if (!$user) {
+            return $this->json([
+                'error' => 'Utilisateur non trouve',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $webauthnCredential = $verifier->verifyAndSaveRegistration($credential, $user);
+            $jwt = $this->jwtManager->create($user);
+            $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, self::REFRESH_TOKEN_TTL);
+            $this->refreshTokenManager->save($refreshToken);
+
+            return $this->json([
+                'success' => true,
+                'token' => $jwt,
+                'refresh_token' => $refreshToken->getRefreshToken(),
+                'user' => [
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ],
+                'passkey' => [
+                    'id' => $webauthnCredential->getId(),
+                    'name' => $webauthnCredential->getName(),
+                ],
+            ], Response::HTTP_CREATED);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Echec de la verification',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    #[Route('/passkey/login/options', name: 'passkey_login_options', methods: ['POST'])]
+    public function passkeyLoginOptions(): JsonResponse
+    {
+        try {
+            $options = $this->passkeyService->getLoginOptions();
+
+            return $this->json([
+                'challenge' => base64_encode($options->challenge),
+                'timeout' => $options->timeout,
+                'rpId' => $options->rpId,
+                'allowCredentials' => array_map(
+                    static fn ($cred) => [
+                        'type' => $cred->type,
+                        'id' => base64_encode($cred->id),
+                        'transports' => $cred->transports,
+                    ],
+                    $options->allowCredentials
+                ),
+                'userVerification' => $options->userVerification,
+            ]);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Erreur lors de la generation des options',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/passkey/login/verify', name: 'passkey_login_verify', methods: ['POST'])]
+    public function passkeyLoginVerify(Request $request, WebAuthnVerifier $verifier): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $credential = $data['credential'] ?? null;
+
+        if (!is_array($credential)) {
+            return $this->json([
+                'error' => 'Credential requis',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $user = $verifier->verifyAssertion($credential);
+            $jwt = $this->jwtManager->create($user);
+            $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, self::REFRESH_TOKEN_TTL);
+            $this->refreshTokenManager->save($refreshToken);
+
+            return $this->json([
+                'success' => true,
+                'token' => $jwt,
+                'refresh_token' => $refreshToken->getRefreshToken(),
+                'user' => [
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'roles' => $user->getRoles(),
+                ],
+            ]);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Echec de l\'authentification',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_UNAUTHORIZED);
         }
     }
 }
