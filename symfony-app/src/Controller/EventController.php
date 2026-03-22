@@ -180,6 +180,60 @@ class EventController extends AbstractController
         }
     }
 
+    #[Route('/{id}/upload-image', name: 'upload_image', methods: ['POST'])]
+    public function uploadImage(string $id, Request $request): JsonResponse
+    {
+        if (!$this->isGranted('ROLE_ADMIN')) {
+            return $this->json([
+                'error' => 'Acces refuse',
+            ], Response::HTTP_FORBIDDEN);
+        }
+
+        $event = $this->eventRepository->find($id);
+        if (!$event instanceof Event) {
+            return $this->json([
+                'error' => 'Evenement non trouve',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $file = $request->files->get('imageFile');
+        if (!$file instanceof UploadedFile) {
+            $file = $request->files->get('image');
+        }
+
+        if (!$file instanceof UploadedFile) {
+            return $this->json([
+                'error' => 'Aucun fichier uploade',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $event->setImageFile($file);
+
+            $errors = $this->validator->validate($event);
+            if (count($errors) > 0) {
+                return $this->json([
+                    'error' => 'Validation echouee',
+                    'details' => $this->formatValidationErrors($errors),
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $this->entityManager->flush();
+
+            return $this->json([
+                'success' => true,
+                'message' => 'Image uploadee avec succes',
+                'image_url' => $event->getImage() ? '/uploads/events/' . $event->getImage() : null,
+                'event' => $event->toArray(),
+            ]);
+        } catch (\Throwable $e) {
+            return $this->json([
+                'error' => 'Erreur lors de l\'upload',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     #[Route('/{id}', name: 'delete', methods: ['DELETE'])]
     public function delete(string $id): JsonResponse
     {
