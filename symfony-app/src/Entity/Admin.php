@@ -2,12 +2,13 @@
 
 namespace App\Entity;
 
+use App\Repository\AdminRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\Types;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: AdminRepository::class)]
 #[ORM\Table(name: '`admin`')]
 class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 {
@@ -80,7 +81,6 @@ class Admin implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function eraseCredentials(): void
     {
-        
     }
 
     private static function generateUuid(): string

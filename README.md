@@ -206,15 +206,6 @@ Accéder à http://localhost:8080/test-auth.html pour tester l'authentification 
 - [ ] Interface utilisateur
 - [ ] Tests
 
-## 🧪 Tests
-```bash
-# Lancer tous les tests
-docker-compose exec php php bin/phpunit
-
-# Tests spécifiques
-docker-compose exec php php bin/phpunit tests/Service/PasskeyAuthServiceTest.php
-```
-
 ## 📚 Ressources
 
 - [JWT RFC 7519](https://datatracker.ietf.org/doc/html/rfc7519)
