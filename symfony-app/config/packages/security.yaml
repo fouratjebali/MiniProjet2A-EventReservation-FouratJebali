@@ -17,6 +17,10 @@ security:
                 class: App\Entity\Admin
                 property: email
 
+        all_users:
+            chain:
+                providers: ['app_user_provider', 'app_admin_provider']
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -37,7 +41,7 @@ security:
         api:
             pattern: ^/api
             stateless: true
-            provider: app_user_provider
+            provider: all_users
             jwt: ~
 
         main:
@@ -50,11 +54,15 @@ security:
         - { path: ^/api/auth/passkey, roles: PUBLIC_ACCESS }
         - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
 
+        - { path: ^/api/events$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/events/[^/]+$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/events, roles: ROLE_ADMIN, methods: [POST, PUT, PATCH, DELETE] }
+
+        - { path: ^/api/reservations/event/[^/]+$, roles: ROLE_ADMIN }
+        - { path: ^/api/reservations, roles: ROLE_USER }
+
         - { path: ^/api/auth/me, roles: ROLE_USER }
         - { path: ^/api/auth/logout, roles: ROLE_USER }
-        - { path: ^/api/events, roles: ROLE_USER, methods: [GET] }
-        - { path: ^/api/reservations, roles: ROLE_USER }
-        - { path: ^/api/admin, roles: ROLE_ADMIN }
 
         - { path: ^/api, roles: ROLE_USER }
 
