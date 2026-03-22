@@ -1,91 +1,72 @@
-# Tests Manuels - Authentification
+# Tests
 
-## Prérequis
-- Docker containers en cours d'exécution
-- Navigateur 
+## Automated Tests
 
-## Tests à effectuer
+Run all tests from the project root:
 
-### 1. Registration Classique
-**Endpoint:** `POST /api/auth/register`
-
-**Payload:**
-```json
-{
-  "email": "test@example.com",
-  "password": "SecurePass123!"
-}
+```bash
+docker compose exec php php bin/phpunit
 ```
 
-**Résultat attendu:** HTTP 201, avec `token`, `refresh_token`, et `user`
+Run specific test files:
 
-### 2. Login Classique
-**Endpoint:** `POST /api/auth/login`
-
-**Payload:**
-```json
-{
-  "email": "test@example.com",
-  "password": "SecurePass123!"
-}
+```bash
+docker compose exec php php bin/phpunit tests/Controller/AuthControllerTest.php
+docker compose exec php php bin/phpunit tests/Controller/EventControllerTest.php
+docker compose exec php php bin/phpunit tests/Controller/ReservationControllerTest.php
+docker compose exec php php bin/phpunit tests/Service/PasskeyAuthServiceTest.php
 ```
 
-**Résultat attendu:** HTTP 200, avec tokens
+## Current Tested Areas
 
-### 3. API Protégée
-**Endpoint:** `GET /api/auth/me`
+- user registration and login
+- `/api/auth/me`
+- passkey registration options
+- public event listing and event details
+- admin-only event creation rules
+- reservation creation, duplicate protection, listing, ownership, cancellation
 
-**Headers:**
-```
-Authorization: Bearer {token}
-```
+## Test Environment Notes
 
-**Résultat attendu:** HTTP 200, avec informations utilisateur
+PHPUnit runs in `APP_ENV=test`.
 
-### 4. Refresh Token
-**Endpoint:** `POST /api/token/refresh`
+If the test database does not exist yet, create it from the project root:
 
-**Payload:**
-```json
-{
-  "refresh_token": "{refresh_token}"
-}
+```bash
+docker compose exec db psql -U appuser -d postgres -c "CREATE DATABASE event_reservation_test;"
+docker compose exec php php bin/console doctrine:schema:create --env=test
 ```
 
-**Résultat attendu:** HTTP 200, nouveau `token`
+This project currently has older migration history mixed with newer entity changes, so the most reliable setup for the test database is:
 
-### 5. Logout
-**Endpoint:** `POST /api/auth/logout`
+- create `event_reservation_test`
+- build the schema from current entities with `doctrine:schema:create --env=test`
 
-**Payload:**
-```json
-{
-  "refresh_token": "{refresh_token}"
-}
+## Manual Browser Tests
+
+Open:
+
+```text
+http://localhost:8080/test-auth.html
 ```
 
-**Résultat attendu:** HTTP 200, confirmation
+That page can be used to test:
 
-## Tests WebAuthn (selon support navigateur)
+- user registration
+- user login
+- `/api/auth/me`
+- passkey registration flow
+- passkey login flow
 
-### 6. Passkey Registration
-**Endpoints:**
-1. `POST /api/auth/passkey/register/options`
-2. `POST /api/auth/passkey/register/verify`
+## Expected Results
 
-### 7. Passkey Login
-**Endpoints:**
-1. `POST /api/auth/passkey/login/options`
-2. `POST /api/auth/passkey/login/verify`
+- auth controller tests pass
+- event controller tests pass
+- reservation controller tests pass
+- passkey service test passes
 
-## Résultats
+If a test fails because of missing JWT keys or passphrase mismatch, regenerate the keypair with your current `.env.local` passphrase:
 
-| Test | Status | Notes |
-|------|--------|-------|
-| Register classique | ✅ | |
-| Login classique | ✅ | |
-| /me endpoint | ✅ | |
-| Refresh token | ✅ | |
-| Logout | ✅ | |
-| Passkey register | ⏳ | Selon support |
-| Passkey login | ⏳ | Selon support |
+```bash
+docker compose exec php php bin/console lexik:jwt:generate-keypair --overwrite
+```

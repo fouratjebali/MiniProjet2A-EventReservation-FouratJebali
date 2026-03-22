@@ -34,7 +34,7 @@ class EventControllerTest extends WebTestCase
             'title' => $this->uniqueTitle('public_list'),
         ]);
 
-        $this->client->request('GET', '/api/events');
+        $this->client->request('GET', '/api/events?limit=50');
 
         $this->assertResponseIsSuccessful();
         $response = $this->getJsonResponse();
