@@ -67,8 +67,13 @@ This loads sample data including:
 
 ## Access
 
-- App / public files: `http://localhost:8080`
+- Frontend home page: `http://localhost:8080`
+- Event details page: `http://localhost:8080/event.html?id=<event-uuid>`
+- My reservations page: `http://localhost:8080/my-reservations.html`
 - Manual auth test page: `http://localhost:8080/test-auth.html`
+- API base: `http://localhost:8080/api`
+
+The Nginx config now serves [symfony-app/public/index.html](/Users/Fuuurat/Desktop/php-symphony/MiniProjet2A-EventReservation-FouratJebali/symfony-app/public/index.html) on `/`, while `/api/*` still routes to Symfony.
 
 ## Seeded Accounts
 
@@ -102,6 +107,34 @@ docker compose exec php php bin/console cache:clear
 docker compose exec php php bin/console doctrine:migrations:status
 docker compose exec php php bin/phpunit
 ```
+
+## Frontend Testing
+
+Quick manual flow:
+
+1. Open `http://localhost:8080`
+2. Register or log in with one of the seeded user accounts
+3. Open `http://localhost:8080/api/events` and copy an event UUID
+4. Open `http://localhost:8080/event.html?id=<event-uuid>`
+5. Create a reservation
+6. Open `http://localhost:8080/my-reservations.html` and verify it appears
+
+Important:
+
+- event IDs are UUIDs, not numeric IDs
+- `event.html?id=1` will fail because there is no numeric event identifier in the current backend
+
+## Test Status
+
+Backend test suite currently passes with:
+
+```bash
+docker compose exec php php bin/phpunit
+```
+
+Latest verified result:
+
+- `OK (27 tests, 117 assertions)`
 
 ## Notes
 
