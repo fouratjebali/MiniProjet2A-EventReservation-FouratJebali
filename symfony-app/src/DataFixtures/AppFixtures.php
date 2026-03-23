@@ -42,6 +42,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+10 days'),
                 'location' => 'Palais des Congres, Sousse',
                 'seats' => 150,
+                'image' => 'conference-tech-2026.jpg',
             ],
             [
                 'title' => 'Concert Jazz Under The Stars',
@@ -49,6 +50,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+15 days'),
                 'location' => 'Theatre de Verdure, Tunis',
                 'seats' => 200,
+                'image' => 'concert-jazz-stars.jpg',
             ],
             [
                 'title' => 'Workshop Developpement Mobile',
@@ -56,6 +58,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+7 days'),
                 'location' => 'ISSAT Sousse',
                 'seats' => 30,
+                'image' => 'workshop-mobile.jpg',
             ],
             [
                 'title' => 'Salon de l\'Entrepreneuriat',
@@ -63,6 +66,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+20 days'),
                 'location' => 'Centre d\'Affaires, Sfax',
                 'seats' => 300,
+                'image' => 'salon-entrepreneuriat.jpg',
             ],
             [
                 'title' => 'Festival de Cinema Documentaire',
@@ -70,6 +74,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+30 days'),
                 'location' => 'Cinema Le Colisee, Tunis',
                 'seats' => 120,
+                'image' => 'festival-documentaire.jpg',
             ],
             [
                 'title' => 'Marathon de Programmation 24h',
@@ -77,6 +82,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+5 days'),
                 'location' => 'TechHub Sousse',
                 'seats' => 80,
+                'image' => 'marathon-programmation.jpg',
             ],
             [
                 'title' => 'Soiree Gastronomique Mediterraneenne',
@@ -84,6 +90,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('+12 days'),
                 'location' => 'Restaurant La Medina, Hammamet',
                 'seats' => 50,
+                'image' => 'soiree-gastronomique.jpg',
             ],
             [
                 'title' => 'Evenement Passe - Archive',
@@ -91,6 +98,7 @@ class AppFixtures extends Fixture
                 'date' => new \DateTime('-10 days'),
                 'location' => 'Quelque part',
                 'seats' => 100,
+                'image' => 'evenement-archive.jpg',
             ],
         ];
 
@@ -102,6 +110,7 @@ class AppFixtures extends Fixture
             $event->setDate($data['date']);
             $event->setLocation($data['location']);
             $event->setSeats($data['seats']);
+            $event->setImage($data['image'] ?? null);
             $event->setCreatedBy($admin);
 
             $manager->persist($event);

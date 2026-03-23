@@ -150,7 +150,7 @@ function createEventCard(event) {
     return `
         <div class="card">
             <img src="${imageUrl}" alt="${title}" class="card-image"
-                 onerror="this.src='/images/event-placeholder.jpg'">
+                 onerror="this.src='/images/event-placeholder.svg'">
             <div class="card-content">
                 <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                     <h3 class="card-title">${title}</h3>

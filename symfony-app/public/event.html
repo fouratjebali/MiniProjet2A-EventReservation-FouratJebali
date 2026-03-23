@@ -9,27 +9,45 @@
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/main.css">
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">ResEvents</a>
+                <a href="/" class="logo">
+                    <i class="fas fa-calendar-alt"></i>
+                    ResEvents
+                </a>
 
-                <nav class="nav">
-                    <a href="/" class="nav-link">Evenements</a>
+                <nav class="nav" id="mainNav">
+                    <a href="/" class="nav-link active">
+                        <i class="fas fa-calendar-check"></i>
+                        Evenements
+                    </a>
                     <a href="/my-reservations.html" class="nav-link" id="myReservationsLink" style="display: none;">
+                        <i class="fas fa-ticket-alt"></i>
                         Mes reservations
                     </a>
                     <div id="authButtons">
                         <button type="button" class="btn btn-outline btn-sm" onclick="window.location.href='/'">
+                            <i class="fas fa-sign-in-alt"></i>
                             Connexion
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="window.location.href='/'">
+                            <i class="fas fa-user-plus"></i>
+                            Inscription
                         </button>
                     </div>
                     <div id="userMenu" style="display: none;">
-                        <span id="userEmail" class="text-gray"></span>
+                        <span id="userEmail" class="text-gray">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
                             Deconnexion
                         </button>
                     </div>

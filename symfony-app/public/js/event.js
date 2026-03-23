@@ -94,7 +94,7 @@ function renderEvent(event) {
     container.innerHTML = `
         <div class="grid" style="grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr); gap: 30px;">
             <article class="card">
-                <img src="${imageUrl}" alt="${title}" class="card-image" style="max-height: 420px; object-fit: cover;" onerror="this.src='/images/event-placeholder.jpg'">
+                <img src="${imageUrl}" alt="${title}" class="card-image" style="max-height: 420px; object-fit: cover;" onerror="this.src='/images/event-placeholder.svg'">
                 <div class="card-content">
                     <div style="display: flex; justify-content: space-between; gap: 12px; align-items: start; margin-bottom: 16px; flex-wrap: wrap;">
                         <h1 class="card-title" style="font-size: 2rem; margin: 0;">${title}</h1>

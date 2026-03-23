@@ -1,40 +1,56 @@
+<!-- index.html - Modern UI Structure -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evenements - Reservation en ligne</title>
+    <title>ResEvents - Reservation d'evenements</title>
 
     <link rel="stylesheet" href="/css/variables.css">
     <link rel="stylesheet" href="/css/reset.css">
     <link rel="stylesheet" href="/css/main.css">
 
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="header">
         <div class="container">
             <div class="header-content">
-                <a href="/" class="logo">ResEvents</a>
+                <a href="/" class="logo">
+                    <i class="fas fa-calendar-alt"></i>
+                    ResEvents
+                </a>
 
                 <nav class="nav" id="mainNav">
-                    <a href="/" class="nav-link active">Evenements</a>
+                    <a href="/" class="nav-link active">
+                        <i class="fas fa-calendar-check"></i>
+                        Evenements
+                    </a>
                     <a href="/my-reservations.html" class="nav-link" id="myReservationsLink" style="display: none;">
+                        <i class="fas fa-ticket-alt"></i>
                         Mes reservations
                     </a>
                     <div id="authButtons">
                         <button type="button" class="btn btn-outline btn-sm" onclick="showLoginModal()">
+                            <i class="fas fa-sign-in-alt"></i>
                             Connexion
                         </button>
                         <button type="button" class="btn btn-primary btn-sm" onclick="showRegisterModal()">
+                            <i class="fas fa-user-plus"></i>
                             Inscription
                         </button>
                     </div>
                     <div id="userMenu" style="display: none;">
-                        <span id="userEmail" class="text-gray"></span>
+                        <span id="userEmail" class="text-gray">
+                            <i class="fas fa-user-circle"></i>
+                        </span>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
                             Deconnexion
                         </button>
                     </div>
@@ -43,41 +59,49 @@
         </div>
     </header>
 
-    <section class="hero" style="background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%); color: white; padding: 60px 0; margin-bottom: 40px;">
+    <section class="hero-modern">
         <div class="container">
-            <h1 style="font-size: 3rem; margin-bottom: 20px; text-align: center;">
+            <h1>
+                <i class="fas fa-meteor"></i>
                 Decouvrez les meilleurs evenements
             </h1>
-            <p style="font-size: 1.25rem; text-align: center; opacity: 0.9; max-width: 600px; margin: 0 auto;">
+            <p>
+                <i class="fas fa-ticket-alt"></i>
                 Reservez votre place pour des conferences, concerts, ateliers et bien plus encore
             </p>
         </div>
     </section>
 
-    <section class="filters" style="margin-bottom: 40px;">
+    <section class="filters-modern">
         <div class="container">
-            <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: center; background: white; padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);">
-                <div>
-                    <label class="form-label" style="margin-bottom: 5px;">Filtrer par :</label>
-                </div>
-                <div>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="filterUpcoming" checked>
-                        <span>Evenements a venir</span>
-                    </label>
-                </div>
-                <div>
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                        <input type="checkbox" id="filterAvailable" checked>
-                        <span>Places disponibles</span>
-                    </label>
-                </div>
-                <div style="margin-left: auto;">
-                    <select id="sortBy" class="form-select" style="width: auto;">
-                        <option value="date">Date (proche vers lointain)</option>
-                        <option value="title">Titre (A vers Z)</option>
-                        <option value="seats">Places disponibles</option>
-                    </select>
+            <div class="filter-card">
+                <div class="filter-group">
+                    <div class="filter-label">
+                        <i class="fas fa-filter"></i>
+                        <strong>Filtrer par :</strong>
+                    </div>
+                    <div>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" id="filterUpcoming" checked>
+                            <span><i class="fas fa-calendar-week"></i> Evenements a venir</span>
+                        </label>
+                    </div>
+                    <div>
+                        <label class="filter-checkbox">
+                            <input type="checkbox" id="filterAvailable" checked>
+                            <span><i class="fas fa-chair"></i> Places disponibles</span>
+                        </label>
+                    </div>
+                    <div style="margin-left: auto;">
+                        <label class="filter-label">
+                            <i class="fas fa-sort-amount-down"></i>
+                            <select id="sortBy" class="form-select" style="width: auto; padding: 0.5rem 2rem 0.5rem 1rem;">
+                                <option value="date"><i class="fas fa-calendar-alt"></i> Date (proche vers lointain)</option>
+                                <option value="title"><i class="fas fa-sort-alpha-down"></i> Titre (A vers Z)</option>
+                                <option value="seats"><i class="fas fa-users"></i> Places disponibles</option>
+                            </select>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
@@ -87,42 +111,57 @@
         <div class="container">
             <div id="eventsContainer">
                 <div style="text-align: center; padding: 60px 0;">
-                    <div class="loading" style="width: 40px; height: 40px; margin: 0 auto 20px;"></div>
-                    <p class="text-gray">Chargement des evenements...</p>
+                    <div class="loading" style="width: 50px; height: 50px; margin: 0 auto 20px;"></div>
+                    <p class="text-gray">
+                        <i class="fas fa-spinner fa-pulse"></i>
+                        Chargement des evenements...
+                    </p>
                 </div>
             </div>
 
-            <div id="paginationContainer" style="margin-top: 40px;"></div>
+            <div id="paginationContainer" class="pagination-container"></div>
         </div>
     </section>
 
+    <!-- Login Modal -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Connexion</h3>
+                <h3 class="modal-title">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Connexion
+                </h3>
                 <span class="modal-close" onclick="closeLoginModal()">&times;</span>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)">
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" required>
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
+                    <input type="email" name="email" class="form-input" placeholder="votre@email.com" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Mot de passe</label>
-                    <input type="password" name="password" class="form-input" required>
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Mot de passe
+                    </label>
+                    <input type="password" name="password" class="form-input" placeholder="••••••" required>
                 </div>
 
                 <div id="loginError" style="display: none;" class="alert alert-error mb-3"></div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-arrow-right"></i>
                     Se connecter
                 </button>
 
                 <p class="text-center mt-3 text-gray">
                     Pas encore de compte ?
                     <a href="#" onclick="showRegisterModal(); closeLoginModal(); return false;" class="text-primary">
+                        <i class="fas fa-user-plus"></i>
                         S'inscrire
                     </a>
                 </p>
@@ -130,39 +169,57 @@
         </div>
     </div>
 
+    <!-- Register Modal -->
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Inscription</h3>
+                <h3 class="modal-title">
+                    <i class="fas fa-user-plus"></i>
+                    Inscription
+                </h3>
                 <span class="modal-close" onclick="closeRegisterModal()">&times;</span>
             </div>
 
             <form id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" required>
+                    <label class="form-label">
+                        <i class="fas fa-envelope"></i>
+                        Email
+                    </label>
+                    <input type="email" name="email" class="form-input" placeholder="votre@email.com" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Mot de passe</label>
-                    <input type="password" name="password" class="form-input" required minlength="6">
-                    <p class="form-help">Minimum 6 caracteres</p>
+                    <label class="form-label">
+                        <i class="fas fa-lock"></i>
+                        Mot de passe
+                    </label>
+                    <input type="password" name="password" class="form-input" placeholder="••••••" required minlength="6">
+                    <p class="form-help">
+                        <i class="fas fa-info-circle"></i>
+                        Minimum 6 caracteres
+                    </p>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Confirmer le mot de passe</label>
-                    <input type="password" name="password_confirm" class="form-input" required>
+                    <label class="form-label">
+                        <i class="fas fa-check-circle"></i>
+                        Confirmer le mot de passe
+                    </label>
+                    <input type="password" name="password_confirm" class="form-input" placeholder="••••••" required>
                 </div>
 
                 <div id="registerError" style="display: none;" class="alert alert-error mb-3"></div>
 
                 <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-check"></i>
                     S'inscrire
                 </button>
 
                 <p class="text-center mt-3 text-gray">
                     Deja un compte ?
                     <a href="#" onclick="showLoginModal(); closeRegisterModal(); return false;" class="text-primary">
+                        <i class="fas fa-sign-in-alt"></i>
                         Se connecter
                     </a>
                 </p>
@@ -170,33 +227,106 @@
         </div>
     </div>
 
-    <footer style="background-color: var(--gray-900); color: var(--gray-400); padding: 40px 0; margin-top: 80px;">
+    <footer class="footer-modern">
         <div class="container">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 40px;">
+            <div class="footer-grid">
                 <div>
-                    <h4 style="color: white; margin-bottom: 15px;">ResEvents</h4>
+                    <h4 class="footer-title">
+                        <i class="fas fa-calendar-alt"></i>
+                        ResEvents
+                    </h4>
                     <p>La plateforme de reservation d'evenements la plus simple et securisee.</p>
                 </div>
                 <div>
-                    <h4 style="color: white; margin-bottom: 15px;">Liens rapides</h4>
-                    <ul style="display: flex; flex-direction: column; gap: 10px;">
-                        <li><a href="/" style="color: var(--gray-400); transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--gray-400)'">Evenements</a></li>
-                        <li><a href="/my-reservations.html" style="color: var(--gray-400); transition: color 0.2s;" onmouseover="this.style.color='white'" onmouseout="this.style.color='var(--gray-400)'">Mes reservations</a></li>
-                    </ul>
+                    <h4 class="footer-title">
+                        <i class="fas fa-link"></i>
+                        Liens rapides
+                    </h4>
+                    <div class="footer-links">
+                        <a href="/">
+                            <i class="fas fa-calendar-check"></i>
+                            Evenements
+                        </a>
+                        <a href="/my-reservations.html">
+                            <i class="fas fa-ticket-alt"></i>
+                            Mes reservations
+                        </a>
+                    </div>
                 </div>
                 <div>
-                    <h4 style="color: white; margin-bottom: 15px;">Contact</h4>
-                    <p>ISSAT Sousse<br>Sousse, Tunisie<br>contact@ResEvents.tn</p>
+                    <h4 class="footer-title">
+                        <i class="fas fa-address-card"></i>
+                        Contact
+                    </h4>
+                    <p>
+                        <i class="fas fa-map-marker-alt"></i>
+                        ISSAT Sousse<br>
+                        Sousse, Tunisie<br>
+                        <i class="fas fa-envelope"></i>
+                        contact@ResEvents.tn
+                    </p>
                 </div>
             </div>
-            <div style="border-top: 1px solid var(--gray-800); margin-top: 40px; padding-top: 20px; text-align: center;">
-                <p>&copy; 2026 ResEvents. Tous droits reserves. | Projet Symfony Dev Web 2.0 3.0</p>
+            <div class="footer-bottom">
+                <p>
+                    <i class="fas fa-copyright"></i>
+                    2026 ResEvents. Tous droits reserves. | Projet Symfony Dev Web 2.0 3.0
+                </p>
             </div>
         </div>
     </footer>
 
+    <!-- Scroll to Top Button -->
+    <div class="scroll-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
     <script src="/js/utils.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/home.js"></script>
+    
+    <!-- Additional UI Enhancement Script -->
+    <script>
+        // Scroll to top functionality
+        const scrollTopBtn = document.getElementById('scrollTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                scrollTopBtn.classList.add('visible');
+            } else {
+                scrollTopBtn.classList.remove('visible');
+            }
+        });
+        
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // Add animation to modals
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+        
+        // Enhance form inputs with floating labels effect (optional)
+        const inputs = document.querySelectorAll('.form-input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.classList.add('focused');
+            });
+            input.addEventListener('blur', () => {
+                if (!input.value) {
+                    input.parentElement.classList.remove('focused');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

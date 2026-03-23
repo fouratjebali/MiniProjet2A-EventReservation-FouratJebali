@@ -139,7 +139,7 @@ function displayFormErrors(form, errors) {
 }
 
 function getImageUrl(filename) {
-    if (!filename) return '/images/event-placeholder.jpg';
+    if (!filename) return '/images/event-placeholder.svg';
     return `/uploads/events/${filename}`;
 }
 

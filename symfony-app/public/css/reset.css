@@ -1,3 +1,4 @@
+/* reset.css - enhanced with modern defaults */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
@@ -8,6 +9,7 @@ html {
     font-size: 16px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
 }
 
 body {
@@ -15,7 +17,7 @@ body {
     font-size: var(--text-base);
     line-height: 1.6;
     color: var(--gray-900);
-    background-color: var(--gray-50);
+    background: linear-gradient(135deg, var(--gray-50) 0%, #FFFFFF 100%);
     min-height: 100vh;
 }
 
@@ -58,3 +60,27 @@ h3 { font-size: var(--text-2xl); }
 h4 { font-size: var(--text-xl); }
 h5 { font-size: var(--text-lg); }
 h6 { font-size: var(--text-base); }
+
+::selection {
+    background-color: var(--primary-color);
+    color: var(--white);
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--gray-100);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-hover);
+}
