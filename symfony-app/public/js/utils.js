@@ -24,6 +24,13 @@ function formatDate(dateString, format = 'full') {
         return '';
     }
 
+    if (format === 'time') {
+        return date.toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    }
+
     const options = {
         short: { day: 'numeric', month: 'short', year: 'numeric' },
         medium: { day: 'numeric', month: 'long', year: 'numeric' },
@@ -35,7 +42,6 @@ function formatDate(dateString, format = 'full') {
             hour: '2-digit',
             minute: '2-digit',
         },
-        time: { hour: '2-digit', minute: '2-digit' },
     };
 
     return date.toLocaleDateString('fr-FR', options[format] || options.full);

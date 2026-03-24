@@ -215,9 +215,13 @@ class API {
     }
 
     async createEvent(eventData) {
+        const body = eventData instanceof FormData
+            ? eventData
+            : JSON.stringify(eventData);
+
         const response = await this.request('/events', {
             method: 'POST',
-            body: JSON.stringify(eventData),
+            body,
         });
 
         const data = await this.parseResponse(response);
@@ -225,9 +229,14 @@ class API {
     }
 
     async updateEvent(id, eventData) {
+        const isFormData = eventData instanceof FormData;
+        const body = eventData instanceof FormData
+            ? eventData
+            : JSON.stringify(eventData);
+
         const response = await this.request(`/events/${id}`, {
-            method: 'PUT',
-            body: JSON.stringify(eventData),
+            method: isFormData ? 'POST' : 'PUT',
+            body,
         });
 
         const data = await this.parseResponse(response);

@@ -192,6 +192,30 @@
     transform: translateY(-1px);
 }
 
+.btn-success {
+    background-color: var(--success);
+    color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-success:hover {
+    background-color: var(--secondary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-error {
+    background-color: var(--error);
+    color: var(--white);
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-error:hover {
+    background-color: #dc2626;
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
 .btn-outline {
     background-color: transparent;
     border: 2px solid var(--primary-color);
