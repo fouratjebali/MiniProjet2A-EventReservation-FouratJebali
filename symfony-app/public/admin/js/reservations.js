@@ -115,7 +115,7 @@ async function loadReservationsPage() {
         ]);
 
         if (!reservationResult.ok || !reservationResult.data) {
-            renderReservationLoadError(reservationResult.data?.error || 'Impossible de charger les reservations de cet evenement.');
+            renderReservationLoadError(formatReservationLoadError(reservationResult));
             return;
         }
 
@@ -136,6 +136,24 @@ async function loadReservationsPage() {
         console.error('Failed to load admin reservations page', error);
         renderReservationLoadError('Impossible de charger les reservations de cet evenement.');
     }
+}
+
+function formatReservationLoadError(result) {
+    const backendMessage = result?.data?.error || result?.data?.message || '';
+
+    if (result?.status === 401) {
+        return 'Le token admin est absent, invalide ou expire. Regenez un JWT admin puis remplacez la valeur jwt_token dans le navigateur.';
+    }
+
+    if (result?.status === 403) {
+        return 'Le token courant ne porte pas vraiment ROLE_ADMIN cote backend. Verifiez que jwt_token est bien un token admin et que auth_user contient ROLE_ADMIN.';
+    }
+
+    if (backendMessage) {
+        return backendMessage;
+    }
+
+    return 'Impossible de charger les reservations de cet evenement.';
 }
 
 function getEventIdFromUrl() {
@@ -199,19 +217,36 @@ function renderMissingEventState() {
 }
 
 function renderReservationLoadError(message) {
+    const eventInfo = document.getElementById('eventInfo');
     const statsCards = document.getElementById('statsCards');
     const reservationsSection = document.getElementById('reservationsSection');
+    const reservationsContainer = document.getElementById('reservationsContainer');
 
-    showError(document.getElementById('eventInfo'), message);
+    if (eventInfo) {
+        eventInfo.innerHTML = `
+            <div class="card-content">
+                <div class="admin-empty-state">
+                    <p class="text-gray">${escapeHtml(message)}</p>
+                    <a href="/admin/event.html" class="btn btn-primary btn-sm">
+                        <i class="fas fa-calendar-days"></i>
+                        Retour a la gestion des evenements
+                    </a>
+                </div>
+            </div>
+        `;
+    }
 
     if (statsCards) {
-        statsCards.style.display = 'grid';
-        showError(statsCards, message);
+        statsCards.style.display = 'none';
+        statsCards.innerHTML = '';
     }
 
     if (reservationsSection) {
-        reservationsSection.style.display = 'block';
-        showError(document.getElementById('reservationsContainer'), message);
+        reservationsSection.style.display = 'none';
+    }
+
+    if (reservationsContainer) {
+        reservationsContainer.innerHTML = '';
     }
 }
 

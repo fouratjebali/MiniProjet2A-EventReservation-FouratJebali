@@ -70,6 +70,9 @@ This loads sample data including:
 - Frontend home page: `http://localhost:8080`
 - Event details page: `http://localhost:8080/event.html?id=<event-uuid>`
 - My reservations page: `http://localhost:8080/my-reservations.html`
+- Admin dashboard: `http://localhost:8080/admin/`
+- Admin event management: `http://localhost:8080/admin/event.html`
+- Admin event reservations: `http://localhost:8080/admin/reservations.html?eventId=<event-uuid>`
 - Manual auth test page: `http://localhost:8080/test-auth.html`
 - API base: `http://localhost:8080/api`
 
@@ -88,6 +91,7 @@ Important:
 - the public API currently exposes user auth routes only
 - there is no dedicated public admin login endpoint yet
 - admin-only routes still exist at backend level and require a `ROLE_ADMIN` JWT
+- the admin frontend exists and is testable, but it currently expects an admin token already stored in the browser
 
 ## Main API Areas
 
@@ -123,6 +127,48 @@ Important:
 
 - event IDs are UUIDs, not numeric IDs
 - `event.html?id=1` will fail because there is no numeric event identifier in the current backend
+
+## Admin Frontend Testing
+
+Current admin pages:
+
+- `http://localhost:8080/admin/`
+- `http://localhost:8080/admin/event.html`
+- `http://localhost:8080/admin/reservations.html?eventId=<event-uuid>`
+
+Current admin flow:
+
+- the admin dashboard is wired to the existing backend routes
+- the events page supports create, edit, image upload, delete, and navigation to reservations per event
+- the reservations page is read-oriented and shows reservations, stats, filters, and quick contact actions for one event
+- there is still no public admin login page yet
+
+To test the admin interface today, generate a real admin JWT from the `php` container:
+
+```powershell
+@'
+<?php
+require '/var/www/vendor/autoload.php';
+(new Symfony\Component\Dotenv\Dotenv())->bootEnv('/var/www/.env');
+
+$kernel = new App\Kernel($_SERVER['APP_ENV'] ?? 'dev', (bool) ($_SERVER['APP_DEBUG'] ?? true));
+$kernel->boot();
+
+$container = $kernel->getContainer();
+$admin = $container->get('doctrine')->getRepository(App\Entity\Admin::class)->findOneBy([
+    'email' => 'admin@event.com'
+]);
+
+echo $container->get('lexik_jwt_authentication.jwt_manager')->create($admin), PHP_EOL;
+'@ | docker compose exec -T php php /dev/stdin
+```
+
+Then in browser storage for `http://localhost:8080`, set:
+
+- `jwt_token` = the generated token
+- `auth_user` = `{"email":"admin@event.com","roles":["ROLE_ADMIN"]}`
+
+After that, reload `/admin/`.
 
 ## Test Status
 

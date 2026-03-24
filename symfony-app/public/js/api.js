@@ -211,7 +211,7 @@ class API {
         const response = await this.request(`/events/${id}`, { skipAuth: true });
         const data = await this.parseResponse(response);
 
-        return { ok: response.ok, data };
+        return { ok: response.ok, status: response.status, data };
     }
 
     async createEvent(eventData) {
@@ -299,7 +299,7 @@ class API {
     async getEventReservations(eventId) {
         const response = await this.request(`/reservations/event/${eventId}`);
         const data = await this.parseResponse(response);
-        return { ok: response.ok, data };
+        return { ok: response.ok, status: response.status, data };
     }
 
     // ========== ADMIN ==========
