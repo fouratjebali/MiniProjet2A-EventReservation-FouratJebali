@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Admin - ResEvents</title>
+
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/admin.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header admin-header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/admin/" class="logo">
+                    <i class="fas fa-shield-halved"></i>
+                    ResEvents
+                    <span class="admin-badge">ADMIN</span>
+                </a>
+
+                <nav class="nav admin-nav" id="mainNav">
+                    <a href="/admin/" class="nav-link active">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                    <a href="/" class="nav-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-globe"></i>
+                        Site public
+                    </a>
+                    <a href="/api/events" class="nav-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-code"></i>
+                        API events
+                    </a>
+                    <div id="userMenu" class="admin-toolbar">
+                        <span id="adminEmail" class="text-gray"><i class="fas fa-user-shield"></i><span>Interface admin</span></span>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Deconnexion
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="container">
+            <section class="admin-hero card">
+                <div class="card-content">
+                    <span class="badge badge-info">Dashboard live</span>
+                    <h1 class="admin-title">Dashboard administrateur</h1>
+                    <p class="admin-subtitle">
+                        Cette page consomme les routes deja disponibles pour afficher une vue d ensemble des evenements,
+                        de l occupation et des reservations. Elle suppose qu un token ROLE_ADMIN est deja present dans le navigateur.
+                    </p>
+
+                    <div class="alert alert-warning admin-alert">
+                        <strong>Note backend :</strong>
+                        Il n y a toujours pas de flux public complet de connexion admin. Le dashboard fonctionne seulement
+                        si un token admin valide est deja stocke cote front.
+                    </div>
+                </div>
+            </section>
+
+            <section id="statsContainer" class="grid grid-cols-4 admin-capabilities">
+                <article class="stat-card" style="grid-column: 1 / -1;">
+                    <div class="admin-loading-block">
+                        <div class="loading"></div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="grid grid-cols-2 admin-sections">
+                <article class="admin-card card">
+                    <div class="card-content">
+                        <h2 class="card-title">Repartition des evenements</h2>
+                        <div class="admin-chart-shell">
+                            <canvas id="eventsChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="admin-card card">
+                    <div class="card-content">
+                        <h2 class="card-title">Occupation globale</h2>
+                        <div class="admin-chart-shell">
+                            <canvas id="occupancyChartCanvas"></canvas>
+                        </div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="admin-card card">
+                <div class="card-content">
+                    <div class="admin-section-header">
+                        <div>
+                            <span class="badge badge-success">Evenements recents</span>
+                            <h2 class="card-title admin-section-title">Apercu rapide des evenements</h2>
+                        </div>
+                        <a href="/" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-arrow-up-right-from-square"></i>
+                            Voir le site public
+                        </a>
+                    </div>
+
+                    <div id="recentEventsContainer">
+                        <div class="admin-loading-block">
+                            <div class="loading"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="/admin/js/dashboard.js"></script>
+</body>
+</html>
