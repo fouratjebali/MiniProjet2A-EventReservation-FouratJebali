@@ -1,13 +1,13 @@
 /* variables.css */
 :root {
-    /* Couleurs principales - upgraded with modern palette */
+    /* Couleurs principales */
     --primary-color: #6366F1;
     --primary-hover: #4F46E5;
     --primary-light: #EEF2FF;
     --secondary-color: #10B981;
     --secondary-hover: #059669;
     
-    /* Couleurs neutres - refined for better contrast */
+    /* Couleurs neutres */
     --dark: #0F172A;
     --gray-900: #0F172A;
     --gray-800: #1E293B;

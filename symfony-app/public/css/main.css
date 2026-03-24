@@ -1,8 +1,5 @@
-/* main.css - Modern UI Overhaul */
 @import url('variables.css');
 @import url('reset.css');
-
-/* Base Layout */
 .container {
     width: 100%;
     max-width: var(--container-max-width);
@@ -10,7 +7,7 @@
     padding: 0 var(--spacing-lg);
 }
 
-/* Header - Glassmorphism */
+/* Header */
 .header {
     background: var(--glass-bg);
     backdrop-filter: blur(12px);
@@ -548,7 +545,7 @@ input[type="checkbox"]:hover {
     to { transform: rotate(360deg); }
 }
 
-/* Modal - Enhanced with Glassmorphism */
+/* Modal */
 .modal {
     display: none;
     position: fixed;
