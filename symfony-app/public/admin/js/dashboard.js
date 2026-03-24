@@ -321,9 +321,7 @@ function createEventRow(event) {
                         <i class="fas fa-eye"></i>
                     </a>
                     <a class="btn btn-secondary btn-icon btn-sm"
-                       href="/api/reservations/event/${eventId}"
-                       target="_blank"
-                       rel="noopener noreferrer"
+                       href="/admin/reservations.html?eventId=${eventId}"
                        title="Voir les reservations">
                         <i class="fas fa-ticket"></i>
                     </a>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Admin - ResEvents</title>
+    <title>Reservations Evenement - Admin ResEvents</title>
 
     <link rel="stylesheet" href="/css/variables.css">
     <link rel="stylesheet" href="/css/reset.css">
@@ -26,7 +26,7 @@
                 </a>
 
                 <nav class="nav admin-nav" id="mainNav">
-                    <a href="/admin/" class="nav-link active">
+                    <a href="/admin/" class="nav-link">
                         <i class="fas fa-chart-line"></i>
                         Dashboard
                     </a>
@@ -34,17 +34,13 @@
                         <i class="fas fa-calendar-days"></i>
                         Evenements
                     </a>
-                    <a href="/admin/reservations.html" class="nav-link">
+                    <a href="/admin/reservations.html" class="nav-link active">
                         <i class="fas fa-ticket"></i>
                         Reservations
                     </a>
                     <a href="/" class="nav-link" target="_blank" rel="noopener noreferrer">
                         <i class="fas fa-globe"></i>
                         Site public
-                    </a>
-                    <a href="/api/events" class="nav-link" target="_blank" rel="noopener noreferrer">
-                        <i class="fas fa-code"></i>
-                        API events
                     </a>
                     <div id="userMenu" class="admin-toolbar">
                         <span id="adminEmail" class="text-gray"><i class="fas fa-user-shield"></i><span>Interface admin</span></span>
@@ -61,23 +57,38 @@
     <main class="admin-main">
         <div class="container">
             <section class="admin-hero card">
-                <div class="card-content">
-                    <span class="badge badge-info">Dashboard live</span>
-                    <h1 class="admin-title">Dashboard administrateur</h1>
-                    <p class="admin-subtitle">
-                        Cette page consomme les routes deja disponibles pour afficher une vue d ensemble des evenements,
-                        de l occupation et des reservations. Elle suppose qu un token ROLE_ADMIN est deja present dans le navigateur.
-                    </p>
+                <div class="card-content admin-page-header">
+                    <div>
+                        <span class="badge badge-info">Suivi admin</span>
+                        <h1 class="admin-title">Reservations par evenement</h1>
+                        <p class="admin-subtitle">
+                            Cette page affiche les reservations d un evenement precis avec le flux admin deja expose par l API.
+                            Elle permet de filtrer rapidement les inscriptions confirmees et annulees, sans inventer des actions backend qui n existent pas encore.
+                        </p>
+                    </div>
 
-                    <div class="alert alert-warning admin-alert">
-                        <strong>Note backend :</strong>
-                        Il n y a toujours pas de flux public complet de connexion admin. Le dashboard fonctionne seulement
-                        si un token admin valide est deja stocke cote front.
+                    <div class="admin-form-actions">
+                        <a href="/admin/event.html" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i>
+                            Retour aux evenements
+                        </a>
+                        <a id="publicEventLink" href="/" class="btn btn-primary" target="_blank" rel="noopener noreferrer">
+                            <i class="fas fa-arrow-up-right-from-square"></i>
+                            Voir la page publique
+                        </a>
                     </div>
                 </div>
             </section>
 
-            <section id="statsContainer" class="grid grid-cols-4 admin-capabilities">
+            <section id="eventInfo" class="admin-card card">
+                <div class="card-content">
+                    <div class="admin-loading-block">
+                        <div class="loading"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="statsCards" class="grid grid-cols-4 admin-capabilities">
                 <article class="stat-card" style="grid-column: 1 / -1;">
                     <div class="admin-loading-block">
                         <div class="loading"></div>
@@ -85,40 +96,25 @@
                 </article>
             </section>
 
-            <section class="grid grid-cols-2 admin-sections">
-                <article class="admin-card card">
-                    <div class="card-content">
-                        <h2 class="card-title">Repartition des evenements</h2>
-                        <div class="admin-chart-shell">
-                            <canvas id="eventsChartCanvas"></canvas>
-                        </div>
-                    </div>
-                </article>
-
-                <article class="admin-card card">
-                    <div class="card-content">
-                        <h2 class="card-title">Occupation globale</h2>
-                        <div class="admin-chart-shell">
-                            <canvas id="occupancyChartCanvas"></canvas>
-                        </div>
-                    </div>
-                </article>
-            </section>
-
-            <section class="admin-card card">
+            <section id="reservationsSection" class="admin-card card">
                 <div class="card-content">
-                    <div class="admin-section-header">
+                    <div class="admin-toolbar-row">
                         <div>
-                            <span class="badge badge-success">Evenements recents</span>
-                            <h2 class="card-title admin-section-title">Apercu rapide des evenements</h2>
+                            <h2 class="card-title admin-section-title">Liste des reservations</h2>
+                            <p class="text-gray">Recherchez un inscrit, filtrez par statut et utilisez les actions de contact rapides.</p>
                         </div>
-                        <a href="/" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
-                            <i class="fas fa-arrow-up-right-from-square"></i>
-                            Voir le site public
-                        </a>
+
+                        <div class="admin-toolbar-controls">
+                            <select id="filterStatus" class="form-select">
+                                <option value="all">Tous les statuts</option>
+                                <option value="confirmed">Confirmees</option>
+                                <option value="cancelled">Annulees</option>
+                            </select>
+                            <input type="search" id="searchInput" class="form-input" placeholder="Rechercher par nom, email ou telephone...">
+                        </div>
                     </div>
 
-                    <div id="recentEventsContainer">
+                    <div id="reservationsContainer">
                         <div class="admin-loading-block">
                             <div class="loading"></div>
                         </div>
@@ -130,7 +126,6 @@
 
     <script src="/js/utils.js"></script>
     <script src="/js/api.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <script src="/admin/js/dashboard.js"></script>
+    <script src="/admin/js/reservations.js"></script>
 </body>
 </html>

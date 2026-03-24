@@ -193,9 +193,11 @@ function createEventRow(event) {
         <tr>
             <td>
                 <div class="admin-table-title">${title}</div>
+                <div class="admin-table-subtitle">${description}</div>
             </td>
             <td>
-                <div>${timeShort}</div>
+                <div>${dateShort}</div>
+                <div class="admin-table-subtitle">${timeShort}</div>
             </td>
             <td>${location}</td>
             <td>
@@ -210,6 +212,9 @@ function createEventRow(event) {
                     <button type="button" class="btn btn-outline btn-icon btn-sm" onclick="editEvent('${eventId}')" title="Modifier">
                         <i class="fas fa-pen"></i>
                     </button>
+                    <a class="btn btn-secondary btn-icon btn-sm" href="/admin/reservations.html?eventId=${eventId}" title="Reservations">
+                        <i class="fas fa-ticket"></i>
+                    </a>
                     <a class="btn btn-secondary btn-icon btn-sm" href="/event.html?id=${eventId}" target="_blank" rel="noopener noreferrer" title="Voir">
                         <i class="fas fa-eye"></i>
                     </a>
