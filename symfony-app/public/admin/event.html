@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion Evenements - Admin ResEvents</title>
+
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/reset.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/admin.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header admin-header">
+        <div class="container">
+            <div class="header-content">
+                <a href="/admin/" class="logo">
+                    <i class="fas fa-shield-halved"></i>
+                    ResEvents
+                    <span class="admin-badge">ADMIN</span>
+                </a>
+
+                <nav class="nav admin-nav" id="mainNav">
+                    <a href="/admin/" class="nav-link">
+                        <i class="fas fa-chart-line"></i>
+                        Dashboard
+                    </a>
+                    <a href="/admin/event.html" class="nav-link active">
+                        <i class="fas fa-calendar-days"></i>
+                        Evenements
+                    </a>
+                    <a href="/" class="nav-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-globe"></i>
+                        Site public
+                    </a>
+                    <a href="/api/events" class="nav-link" target="_blank" rel="noopener noreferrer">
+                        <i class="fas fa-code"></i>
+                        API events
+                    </a>
+                    <div id="userMenu" class="admin-toolbar">
+                        <span id="adminEmail" class="text-gray"><i class="fas fa-user-shield"></i><span>Interface admin</span></span>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Deconnexion
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <main class="admin-main">
+        <div class="container">
+            <section class="admin-hero card">
+                <div class="card-content admin-page-header">
+                    <div>
+                        <span class="badge badge-info">Gestion admin</span>
+                        <h1 class="admin-title">Gestion des evenements</h1>
+                        <p class="admin-subtitle">
+                            Creez, modifiez, illustrez et supprimez les evenements avec les routes admin deja disponibles.
+                        </p>
+                    </div>
+
+                    <button type="button" class="btn btn-primary" id="createEventBtn" onclick="showCreateEventForm()">
+                        <i class="fas fa-plus"></i>
+                        Nouvel evenement
+                    </button>
+                </div>
+            </section>
+
+            <section id="eventFormSection" class="admin-form-section card" style="display: none;">
+                <div class="card-content">
+                    <div class="admin-form-header">
+                        <div>
+                            <span class="badge badge-success">Edition</span>
+                            <h2 id="formTitle" class="card-title admin-section-title">Creer un evenement</h2>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="hideEventForm()">
+                            <i class="fas fa-xmark"></i>
+                            Fermer
+                        </button>
+                    </div>
+
+                    <form id="eventForm">
+                        <input type="hidden" id="eventId" name="id">
+
+                        <div class="grid grid-cols-2 admin-form-grid">
+                            <div class="form-group">
+                                <label class="form-label" for="eventTitle">Titre *</label>
+                                <input id="eventTitle" type="text" name="title" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="eventDate">Date et heure *</label>
+                                <input id="eventDate" type="datetime-local" name="date" class="form-input" required>
+                            </div>
+
+                            <div class="form-group admin-full-width">
+                                <label class="form-label" for="eventDescription">Description *</label>
+                                <textarea id="eventDescription" name="description" class="form-textarea" rows="4" required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="eventLocation">Lieu *</label>
+                                <input id="eventLocation" type="text" name="location" class="form-input" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="eventSeats">Nombre de places *</label>
+                                <input id="eventSeats" type="number" name="seats" class="form-input" min="1" required>
+                            </div>
+
+                            <div class="form-group admin-full-width">
+                                <label class="form-label" for="imageInput">Image</label>
+                                <input id="imageInput" type="file" name="imageFile" accept="image/jpeg,image/png,image/webp" class="form-input">
+                                <p class="form-help">Formats acceptes: JPEG, PNG, WebP. Taille max 5 MB.</p>
+
+                                <div class="image-preview" id="imagePreview">
+                                    <div class="image-preview-placeholder">
+                                        <i class="fas fa-image"></i>
+                                        <p>Aucune image selectionnee</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="formError" style="display: none;" class="alert alert-error mb-3"></div>
+                        <div id="formSuccess" style="display: none;" class="alert alert-success mb-3"></div>
+
+                        <div class="admin-form-actions">
+                            <button type="button" class="btn btn-secondary" onclick="hideEventForm()">
+                                Annuler
+                            </button>
+                            <button type="submit" class="btn btn-success" id="submitBtn">
+                                <i class="fas fa-floppy-disk"></i>
+                                Enregistrer
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="admin-card card">
+                <div class="card-content">
+                    <div class="admin-toolbar-row">
+                        <div>
+                            <h2 class="card-title admin-section-title">Tous les evenements</h2>
+                            <p class="text-gray">Filtrez la liste, modifiez un evenement ou ouvrez sa page publique.</p>
+                        </div>
+
+                        <div class="admin-toolbar-controls">
+                            <select id="filterStatus" class="form-select">
+                                <option value="all">Tous</option>
+                                <option value="upcoming">A venir</option>
+                                <option value="past">Passes</option>
+                            </select>
+                            <input type="search" id="searchInput" class="form-input" placeholder="Rechercher un evenement...">
+                        </div>
+                    </div>
+
+                    <div id="eventsContainer">
+                        <div class="admin-loading-block">
+                            <div class="loading"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Supprimer l evenement</h3>
+                <span class="modal-close" onclick="closeDeleteModal()">&times;</span>
+            </div>
+
+            <div id="deleteWarning" class="mb-3"></div>
+
+            <p style="margin: 20px 0;">
+                Etes-vous sur de vouloir supprimer cet evenement ?
+                <strong>Cette action est irreversible.</strong>
+            </p>
+
+            <div class="admin-form-actions">
+                <button type="button" class="btn btn-secondary" onclick="closeDeleteModal()">
+                    Annuler
+                </button>
+                <button type="button" class="btn btn-error" id="confirmDeleteBtn">
+                    <i class="fas fa-trash"></i>
+                    Supprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/utils.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/admin/js/events.js"></script>
+</body>
+</html>
