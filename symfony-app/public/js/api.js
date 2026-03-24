@@ -293,6 +293,75 @@ class API {
         return { ok: response.ok, data };
     }
 
+    // ========== ADMIN ==========
+
+    hasRole(role) {
+        return Array.isArray(this.user?.roles) && this.user.roles.includes(role);
+    }
+
+    async getDashboardStats() {
+        const eventsResult = await this.getEvents({ limit: 100 });
+
+        if (!eventsResult.ok || !eventsResult.data) {
+            return {
+                events: {
+                    total: 0,
+                    upcoming: 0,
+                    past: 0,
+                },
+                reservations: {
+                    total: 0,
+                    available: 0,
+                    occupancy: 0,
+                },
+                recentEvents: [],
+            };
+        }
+
+        const events = eventsResult.data.events || [];
+        const now = new Date();
+
+        const upcomingEvents = events.filter((event) => {
+            const eventDate = typeof parseApiDate === 'function'
+                ? parseApiDate(event.date)
+                : new Date(String(event.date).trim().replace(' ', 'T'));
+
+            return eventDate && !Number.isNaN(eventDate.getTime()) && eventDate > now;
+        }).length;
+
+        const totalSeats = events.reduce((sum, event) => sum + Number(event.seats || 0), 0);
+        const reservedSeats = events.reduce((sum, event) => sum + Number(event.reservations_count || 0), 0);
+        const availableSeats = Math.max(0, totalSeats - reservedSeats);
+
+        return {
+            events: {
+                total: events.length,
+                upcoming: upcomingEvents,
+                past: Math.max(0, events.length - upcomingEvents),
+            },
+            reservations: {
+                total: reservedSeats,
+                available: availableSeats,
+                occupancy: totalSeats > 0 ? Math.round((reservedSeats / totalSeats) * 100) : 0,
+            },
+            recentEvents: events.slice(0, 5),
+        };
+    }
+
+    async getEventReservationStats(eventId) {
+        const result = await this.getEventReservations(eventId);
+
+        return {
+            ok: result.ok,
+            data: result.data?.stats || {
+                total: 0,
+                confirmed: 0,
+                cancelled: 0,
+            },
+            raw: result.data || null,
+        };
+    }
+
     async getPasskeyRegisterOptions(email) {
         const response = await this.request('/auth/passkey/register/options', {
             method: 'POST',
