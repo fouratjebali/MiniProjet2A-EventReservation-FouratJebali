@@ -14,26 +14,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 async function checkAdminAuth() {
     if (!api.isAuthenticated()) {
-        renderAccessMessage(
-            'Token admin manquant',
-            'La page admin a besoin d un jwt_token present dans le localStorage avant de pouvoir charger le dashboard.',
-            [
-                'Ajoutez la cle localStorage jwt_token avec un vrai token admin.',
-                'Ajoutez aussi auth_user avec roles contenant ROLE_ADMIN.',
-            ]
-        );
+        redirectToAdminLogin();
         return false;
     }
 
     if (!api.isAdmin()) {
-        renderAccessMessage(
-            'Role admin non detecte',
-            'Le token existe, mais auth_user ne contient pas ROLE_ADMIN ou la valeur stockee est invalide.',
-            [
-                `auth_user actuel: ${localStorage.getItem('auth_user') || 'absent'}`,
-                'La valeur attendue ressemble a {"email":"admin@event.com","roles":["ROLE_ADMIN"]}.',
-            ]
-        );
+        redirectToAdminLogin();
         return false;
     }
 
@@ -47,6 +33,12 @@ async function checkAdminAuth() {
     }
 
     return true;
+}
+
+function redirectToAdminLogin() {
+    const loginUrl = new URL('/admin/', window.location.origin);
+    loginUrl.searchParams.set('redirect', `${window.location.pathname}${window.location.search}`);
+    window.location.href = loginUrl.toString();
 }
 
 function renderAccessMessage(title, message, details = []) {
@@ -335,6 +327,6 @@ async function handleLogout() {
     const shouldLogout = confirm('Etes-vous sur de vouloir vous deconnecter ?');
 
     if (shouldLogout) {
-        await api.logout();
+        await api.logout('/admin/');
     }
 }

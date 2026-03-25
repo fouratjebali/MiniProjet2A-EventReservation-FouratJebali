@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Admin;
 use App\Entity\User;
+use App\Repository\AdminRepository;
 use App\Repository\UserRepository;
 use App\Service\PasskeyAuthService;
 use App\Service\WebAuthnVerifier;
@@ -31,6 +33,7 @@ class AuthController extends AbstractController
         private UserPasswordHasherInterface $passwordHasher,
         private PasskeyAuthService $passkeyService,
         private UserRepository $userRepository,
+        private AdminRepository $adminRepository,
         private ValidatorInterface $validator
     ) {
     }
@@ -121,10 +124,51 @@ class AuthController extends AbstractController
         ]);
     }
 
+    #[Route('/admin/login', name: 'admin_login', methods: ['POST'])]
+    public function adminLogin(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        if (!isset($data['email'], $data['password'])) {
+            return $this->json([
+                'error' => 'Email et password requis',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $admin = $this->adminRepository->findOneBy(['email' => $data['email']]);
+
+        if (!$admin instanceof Admin || !$this->passwordHasher->isPasswordValid($admin, $data['password'])) {
+            return $this->json([
+                'error' => 'Identifiants admin invalides',
+            ], Response::HTTP_UNAUTHORIZED);
+        }
+
+        $jwt = $this->jwtManager->create($admin);
+
+        return $this->json([
+            'success' => true,
+            'token' => $jwt,
+            'user' => [
+                'id' => $admin->getId(),
+                'email' => $admin->getEmail(),
+                'roles' => $admin->getRoles(),
+            ],
+        ]);
+    }
+
     #[Route('/me', name: 'me', methods: ['GET'])]
     public function me(): JsonResponse
     {
         $user = $this->getUser();
+
+        if ($user instanceof Admin) {
+            return $this->json([
+                'id' => $user->getId(),
+                'email' => $user->getEmail(),
+                'roles' => $user->getRoles(),
+                'passkeys_count' => 0,
+            ]);
+        }
 
         if (!$user instanceof User) {
             return $this->json([

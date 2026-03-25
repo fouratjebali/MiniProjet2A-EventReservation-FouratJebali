@@ -53,6 +53,37 @@
     max-width: 1480px;
 }
 
+.admin-auth-main {
+    min-height: calc(100vh - 96px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 86px 0 72px;
+}
+
+.admin-auth-main .container {
+    max-width: 560px;
+    width: 100%;
+}
+
+.admin-auth-shell {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.admin-auth-header {
+    margin-bottom: 20px;
+}
+
+.admin-auth-card {
+    width: 100%;
+}
+
+.admin-auth-card .card-content {
+    padding: 2rem;
+}
+
 .admin-page-header {
     display: flex;
     justify-content: space-between;
@@ -521,5 +552,10 @@
 
     .admin-chart-shell {
         min-height: 260px;
+    }
+
+    .admin-auth-shell {
+        grid-template-columns: 1fr;
+        max-width: 100%;
     }
 }

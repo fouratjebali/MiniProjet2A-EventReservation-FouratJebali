@@ -27,7 +27,7 @@ security:
             security: false
 
         auth_api:
-            pattern: ^/api/auth/(register|login|passkey)
+            pattern: ^/api/auth/(register|login|admin/login|passkey)
             stateless: true
             security: false
 
@@ -51,6 +51,7 @@ security:
     access_control:
         - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/auth/admin/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/passkey, roles: PUBLIC_ACCESS }
         - { path: ^/api/token/refresh, roles: PUBLIC_ACCESS }
 

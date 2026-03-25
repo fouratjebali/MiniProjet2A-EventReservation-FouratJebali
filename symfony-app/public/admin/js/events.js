@@ -41,18 +41,12 @@ function setupEventPage() {
 
 async function checkAdminAuth() {
     if (!api.isAuthenticated()) {
-        renderAdminAccessState(
-            'Token admin manquant',
-            'Cette page a besoin d un jwt_token admin et d un auth_user contenant ROLE_ADMIN avant de charger la gestion des evenements.'
-        );
+        redirectToAdminLogin();
         return false;
     }
 
     if (!api.isAdmin()) {
-        renderAdminAccessState(
-            'Role admin non detecte',
-            'Le token existe, mais auth_user ne contient pas ROLE_ADMIN ou la valeur locale est invalide.'
-        );
+        redirectToAdminLogin();
         return false;
     }
 
@@ -66,6 +60,12 @@ async function checkAdminAuth() {
     }
 
     return true;
+}
+
+function redirectToAdminLogin() {
+    const loginUrl = new URL('/admin/', window.location.origin);
+    loginUrl.searchParams.set('redirect', `${window.location.pathname}${window.location.search}`);
+    window.location.href = loginUrl.toString();
 }
 
 function renderAdminAccessState(title, message) {
@@ -462,7 +462,7 @@ async function handleLogout() {
     const shouldLogout = confirm('Etes-vous sur de vouloir vous deconnecter ?');
 
     if (shouldLogout) {
-        await api.logout();
+        await api.logout('/admin/');
     }
 }
 

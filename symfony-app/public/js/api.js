@@ -174,7 +174,25 @@ class API {
         return { ok: response.ok, data };
     }
 
-    async logout() {
+    async loginAdmin(email, password) {
+        const response = await this.request('/auth/admin/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password }),
+            skipAuth: true,
+        });
+
+        const data = await this.parseResponse(response);
+
+        if (response.ok && data?.token) {
+            localStorage.removeItem('refresh_token');
+            this.refreshToken = null;
+            this.setToken(data.token, null, data.user ?? null);
+        }
+
+        return { ok: response.ok, status: response.status, data };
+    }
+
+    async logout(redirectTo = '/') {
         if (this.refreshToken) {
             await this.request('/auth/logout', {
                 method: 'POST',
@@ -183,7 +201,7 @@ class API {
         }
 
         this.clearTokens();
-        window.location.href = '/';
+        window.location.href = redirectTo;
     }
 
     async getCurrentUser() {
