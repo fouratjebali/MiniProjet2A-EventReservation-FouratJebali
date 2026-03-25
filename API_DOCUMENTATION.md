@@ -264,6 +264,70 @@ Content-Type: application/json
 }
 ```
 
+## Reservation Endpoints
+
+### Create Reservation
+
+Authenticated user only:
+
+```http
+POST /api/reservations
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+```json
+{
+  "event_id": "uuid",
+  "name": "John Doe",
+  "email": "john@example.com",
+  "phone": "+21612345678"
+}
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Reservation creee avec succes",
+  "reservation": {},
+  "email_notification_sent": true,
+  "warning": null
+}
+```
+
+Notes:
+
+- a confirmation email is sent after reservation creation
+- if email delivery fails, the reservation still stays created and `email_notification_sent` becomes `false`
+
+### Cancel Reservation
+
+Authenticated owner only:
+
+```http
+POST /api/reservations/{id}/cancel
+Authorization: Bearer {token}
+```
+
+Success response:
+
+```json
+{
+  "success": true,
+  "message": "Reservation annulee avec succes",
+  "reservation": {},
+  "email_notification_sent": true,
+  "warning": null
+}
+```
+
+Notes:
+
+- a cancellation email is sent after reservation cancellation
+- if email delivery fails, the cancellation still succeeds and `email_notification_sent` becomes `false`
+
 ### Update Event
 
 Admin only:

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Annulation de reservation</title>
+</head>
+<body style="margin:0;padding:0;background:#f8fafc;font-family:Arial,sans-serif;color:#0f172a;">
+    <div style="max-width:640px;margin:0 auto;padding:32px 20px;">
+        <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:20px;padding:32px;box-shadow:0 10px 30px rgba(15,23,42,0.08);">
+            <p style="margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:#ef4444;">ResEvents</p>
+            <h1 style="margin:0 0 16px;font-size:28px;line-height:1.2;">Reservation annulee</h1>
+
+            <p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#475569;">
+                Bonjour {{ reservation.name }}, votre reservation a bien ete annulee.
+            </p>
+
+            <div style="margin:24px 0;padding:20px;border-radius:16px;background:#fff1f2;border:1px solid #fecdd3;">
+                <p style="margin:0 0 8px;font-size:18px;font-weight:700;color:#0f172a;">
+                    {{ reservation.event.title }}
+                </p>
+                <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#475569;">
+                    Date : {{ reservation.event.date|date('d/m/Y') }} a {{ reservation.event.date|date('H:i') }}
+                </p>
+                <p style="margin:0 0 8px;font-size:14px;line-height:1.7;color:#475569;">
+                    Lieu : {{ reservation.event.location }}
+                </p>
+                <p style="margin:0;font-size:14px;line-height:1.7;color:#475569;">
+                    Reservation : {{ reservation.id }}
+                </p>
+            </div>
+
+            <p style="margin:0;font-size:14px;line-height:1.7;color:#64748b;">
+                Si cette annulation n'etait pas voulue, vous pouvez retourner sur le site et effectuer une nouvelle reservation si des places sont encore disponibles.
+            </p>
+        </div>
+    </div>
+</body>
+</html>

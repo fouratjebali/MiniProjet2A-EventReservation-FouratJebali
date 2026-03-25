@@ -111,6 +111,7 @@ Important:
 
 - the database contains an admin account
 - users must verify their email after registration before they can log in
+- reservation confirmation and cancellation emails are sent through the configured mailer
 - the project now exposes a dedicated admin login endpoint and admin login page
 - admin-only routes still exist at backend level and require a `ROLE_ADMIN` JWT
 - Mailpit is available locally to inspect verification emails during development
@@ -145,7 +146,8 @@ Quick manual flow:
 5. Open `http://localhost:8080/api/events` and copy an event UUID
 6. Open `http://localhost:8080/event.html?id=<event-uuid>`
 7. Create a reservation
-8. Open `http://localhost:8080/my-reservations.html` and verify it appears
+8. Open `http://localhost:8025` and verify the reservation confirmation email
+9. Open `http://localhost:8080/my-reservations.html` and verify it appears
 
 Important:
 

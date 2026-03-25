@@ -6,6 +6,7 @@ use App\Entity\Reservation;
 use App\Entity\User;
 use App\Repository\EventRepository;
 use App\Repository\ReservationRepository;
+use App\Service\ReservationEmailNotifier;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -22,6 +23,7 @@ class ReservationController extends AbstractController
         private EventRepository $eventRepository,
         private EntityManagerInterface $entityManager,
         private ValidatorInterface $validator,
+        private ReservationEmailNotifier $reservationEmailNotifier,
     ) {
     }
 
@@ -103,10 +105,18 @@ class ReservationController extends AbstractController
             $this->entityManager->persist($reservation);
             $this->entityManager->flush();
 
+            $emailNotificationSent = $this->sendNotificationSafely(
+                fn () => $this->reservationEmailNotifier->sendReservationConfirmation($reservation)
+            );
+
             return $this->json([
                 'success' => true,
                 'message' => 'Reservation creee avec succes',
                 'reservation' => $reservation->toArray(),
+                'email_notification_sent' => $emailNotificationSent,
+                'warning' => $emailNotificationSent
+                    ? null
+                    : 'La reservation a bien ete enregistree, mais l email de confirmation n a pas pu etre envoye.',
             ], Response::HTTP_CREATED);
         } catch (\Throwable $e) {
             return $this->json([
@@ -198,10 +208,18 @@ class ReservationController extends AbstractController
             $reservation->cancel();
             $this->entityManager->flush();
 
+            $emailNotificationSent = $this->sendNotificationSafely(
+                fn () => $this->reservationEmailNotifier->sendReservationCancellation($reservation)
+            );
+
             return $this->json([
                 'success' => true,
                 'message' => 'Reservation annulee avec succes',
                 'reservation' => $reservation->toArray(),
+                'email_notification_sent' => $emailNotificationSent,
+                'warning' => $emailNotificationSent
+                    ? null
+                    : 'La reservation a bien ete annulee, mais l email d annulation n a pas pu etre envoye.',
             ]);
         } catch (\Throwable $e) {
             return $this->json([
@@ -282,5 +300,16 @@ class ReservationController extends AbstractController
         }
 
         return $messages;
+    }
+
+    private function sendNotificationSafely(callable $sendNotification): bool
+    {
+        try {
+            $sendNotification();
+
+            return true;
+        } catch (\Throwable) {
+            return false;
+        }
     }
 }

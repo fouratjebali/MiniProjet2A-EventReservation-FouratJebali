@@ -77,6 +77,7 @@ class ReservationControllerTest extends WebTestCase
         $this->assertSame('Reservation creee avec succes', $response['message']);
         $this->assertSame($event->getId(), $response['reservation']['event']['id']);
         $this->assertSame($user['email'], $response['reservation']['email']);
+        $this->assertTrue($response['email_notification_sent']);
     }
 
     public function testCreateReservationRejectsDuplicateReservationForSameUser(): void
@@ -169,6 +170,7 @@ class ReservationControllerTest extends WebTestCase
         $this->assertTrue($response['success']);
         $this->assertSame('Reservation annulee avec succes', $response['message']);
         $this->assertSame(Reservation::STATUS_CANCELLED, $response['reservation']['status']);
+        $this->assertTrue($response['email_notification_sent']);
     }
 
     public function testByEventRequiresAdmin(): void
