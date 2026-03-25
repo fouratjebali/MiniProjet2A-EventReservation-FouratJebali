@@ -14,11 +14,11 @@ Protected endpoints require:
 Authorization: Bearer {token}
 ```
 
-## Important Auth Note
+## Important Auth Notes
 
-The current public API exposes authentication routes for `User`.
-
-Admin-only event and reservation endpoints exist and are protected by `ROLE_ADMIN`, but there is not yet a dedicated public admin login endpoint in the current controller set.
+- `User` accounts must verify their email after registration before they can log in.
+- Admin-only event and reservation endpoints are protected by `ROLE_ADMIN`.
+- The API now exposes a dedicated admin login endpoint.
 
 ## Auth Endpoints
 
@@ -41,15 +41,22 @@ Success response:
 ```json
 {
   "success": true,
-  "token": "jwt",
-  "refresh_token": "refresh-token",
+  "message": "Compte cree. Verifiez votre boite email avant de vous connecter.",
+  "verification_sent": true,
   "user": {
     "id": "uuid",
     "email": "user@example.com",
-    "roles": ["ROLE_USER"]
-  }
+    "roles": ["ROLE_USER"],
+    "is_verified": false
+  },
+  "verification_url": "http://localhost:8080/api/auth/verify/email?..."
 }
 ```
+
+Notes:
+
+- no JWT is returned at registration time anymore
+- `verification_url` is provided only outside production to make local testing easier
 
 ### Login
 
@@ -62,6 +69,43 @@ Content-Type: application/json
 {
   "email": "user@example.com",
   "password": "SecurePass123!"
+}
+```
+
+If the account is not verified yet, the API returns `403 Forbidden` with:
+
+```json
+{
+  "error": "Veuillez verifier votre adresse email avant de vous connecter",
+  "is_verified": false
+}
+```
+
+### Verify Email
+
+```http
+GET /api/auth/verify/email?expires=...&id=...&signature=...&token=...
+```
+
+This endpoint validates the signed verification link and redirects the browser to:
+
+- `/?verified=success`
+- `/?verified=already`
+- `/?verified=failed`
+- `/?verified=invalid`
+- `/?verified=missing`
+
+### Admin Login
+
+```http
+POST /api/auth/admin/login
+Content-Type: application/json
+```
+
+```json
+{
+  "email": "admin@event.com",
+  "password": "admin123"
 }
 ```
 

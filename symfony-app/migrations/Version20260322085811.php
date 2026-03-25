@@ -21,7 +21,7 @@ final class Version20260322085811 extends AbstractMigration
     {
         $this->addSql('ALTER TABLE reservations DROP CONSTRAINT fk_4da23971f7e88b');
         $this->addSql('ALTER TABLE reservations ADD status VARCHAR(20) NOT NULL');
-        $this->addSql('ALTER TABLE reservations ADD user_id UUID DEFAULT NULL');
+        $this->addSql('ALTER TABLE reservations ADD user_id VARCHAR(36) DEFAULT NULL');
         $this->addSql('ALTER TABLE reservations ADD CONSTRAINT FK_4DA23971F7E88B FOREIGN KEY (event_id) REFERENCES events (id) ON DELETE CASCADE NOT DEFERRABLE');
         $this->addSql('ALTER TABLE reservations ADD CONSTRAINT FK_4DA239A76ED395 FOREIGN KEY (user_id) REFERENCES "user" (id) ON DELETE SET NULL NOT DEFERRABLE');
         $this->addSql('CREATE INDEX IDX_4DA239A76ED395 ON reservations (user_id)');

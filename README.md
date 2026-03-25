@@ -49,6 +49,26 @@ docker compose exec php php bin/console lexik:jwt:generate-keypair --overwrite
 docker compose exec php php bin/console cache:clear
 ```
 
+## Email Delivery
+
+By default, development email is sent to Mailpit:
+
+- inbox: `http://localhost:8025`
+
+If you want real Gmail delivery instead, set `MAILER_DSN` in
+[symfony-app/.env.local](/Users/Fuuurat/Desktop/php-symphony/MiniProjet2A-EventReservation-FouratJebali/symfony-app/.env.local)
+with a Gmail app password:
+
+```env
+MAILER_DSN=smtp://your.email%40gmail.com:your16charapppassword@smtp.gmail.com:587?encryption=tls&auth_mode=login
+```
+
+Important:
+
+- use a Gmail `App Password`, not your normal Google password
+- Gmail app passwords require Google `2-Step Verification`
+- `%40` is the URL-encoded form of `@`
+
 ## Database Setup
 
 Development database:
@@ -70,10 +90,12 @@ This loads sample data including:
 - Frontend home page: `http://localhost:8080`
 - Event details page: `http://localhost:8080/event.html?id=<event-uuid>`
 - My reservations page: `http://localhost:8080/my-reservations.html`
-- Admin dashboard: `http://localhost:8080/admin/`
+- Admin login: `http://localhost:8080/admin/`
+- Admin dashboard: `http://localhost:8080/admin/dashboard.html`
 - Admin event management: `http://localhost:8080/admin/event.html`
 - Admin event reservations: `http://localhost:8080/admin/reservations.html?eventId=<event-uuid>`
 - Manual auth test page: `http://localhost:8080/test-auth.html`
+- Mailpit inbox: `http://localhost:8025`
 - API base: `http://localhost:8080/api`
 
 The Nginx config now serves [symfony-app/public/index.html](/Users/Fuuurat/Desktop/php-symphony/MiniProjet2A-EventReservation-FouratJebali/symfony-app/public/index.html) on `/`, while `/api/*` still routes to Symfony.
@@ -88,10 +110,10 @@ Fixtures create:
 Important:
 
 - the database contains an admin account
-- the public API currently exposes user auth routes only
-- there is no dedicated public admin login endpoint yet
+- users must verify their email after registration before they can log in
+- the project now exposes a dedicated admin login endpoint and admin login page
 - admin-only routes still exist at backend level and require a `ROLE_ADMIN` JWT
-- the admin frontend exists and is testable, but it currently expects an admin token already stored in the browser
+- Mailpit is available locally to inspect verification emails during development
 
 ## Main API Areas
 
@@ -117,11 +139,13 @@ docker compose exec php php bin/phpunit
 Quick manual flow:
 
 1. Open `http://localhost:8080`
-2. Register or log in with one of the seeded user accounts
-3. Open `http://localhost:8080/api/events` and copy an event UUID
-4. Open `http://localhost:8080/event.html?id=<event-uuid>`
-5. Create a reservation
-6. Open `http://localhost:8080/my-reservations.html` and verify it appears
+2. Register a new user
+3. Open `http://localhost:8025` and click the verification email
+4. Log in with the verified account
+5. Open `http://localhost:8080/api/events` and copy an event UUID
+6. Open `http://localhost:8080/event.html?id=<event-uuid>`
+7. Create a reservation
+8. Open `http://localhost:8080/my-reservations.html` and verify it appears
 
 Important:
 
@@ -133,42 +157,17 @@ Important:
 Current admin pages:
 
 - `http://localhost:8080/admin/`
+- `http://localhost:8080/admin/dashboard.html`
 - `http://localhost:8080/admin/event.html`
 - `http://localhost:8080/admin/reservations.html?eventId=<event-uuid>`
 
 Current admin flow:
 
+- `/admin/` is now a real admin login page
 - the admin dashboard is wired to the existing backend routes
 - the events page supports create, edit, image upload, delete, and navigation to reservations per event
 - the reservations page is read-oriented and shows reservations, stats, filters, and quick contact actions for one event
-- there is still no public admin login page yet
-
-To test the admin interface today, generate a real admin JWT from the `php` container:
-
-```powershell
-@'
-<?php
-require '/var/www/vendor/autoload.php';
-(new Symfony\Component\Dotenv\Dotenv())->bootEnv('/var/www/.env');
-
-$kernel = new App\Kernel($_SERVER['APP_ENV'] ?? 'dev', (bool) ($_SERVER['APP_DEBUG'] ?? true));
-$kernel->boot();
-
-$container = $kernel->getContainer();
-$admin = $container->get('doctrine')->getRepository(App\Entity\Admin::class)->findOneBy([
-    'email' => 'admin@event.com'
-]);
-
-echo $container->get('lexik_jwt_authentication.jwt_manager')->create($admin), PHP_EOL;
-'@ | docker compose exec -T php php /dev/stdin
-```
-
-Then in browser storage for `http://localhost:8080`, set:
-
-- `jwt_token` = the generated token
-- `auth_user` = `{"email":"admin@event.com","roles":["ROLE_ADMIN"]}`
-
-After that, reload `/admin/`.
+- the admin session is handled by the frontend login form and stored in browser storage
 
 ## Test Status
 

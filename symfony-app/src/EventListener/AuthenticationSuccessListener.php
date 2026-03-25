@@ -20,6 +20,10 @@ class AuthenticationSuccessListener
             $userData['id'] = $user->getId();
         }
 
+        if (method_exists($user, 'isVerified')) {
+            $userData['is_verified'] = $user->isVerified();
+        }
+
         $data['user'] = $userData;
 
         $event->setData($data);

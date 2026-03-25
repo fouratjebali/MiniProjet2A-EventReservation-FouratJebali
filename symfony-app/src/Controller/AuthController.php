@@ -6,6 +6,7 @@ use App\Entity\Admin;
 use App\Entity\User;
 use App\Repository\AdminRepository;
 use App\Repository\UserRepository;
+use App\Security\EmailVerifier;
 use App\Service\PasskeyAuthService;
 use App\Service\WebAuthnVerifier;
 use Doctrine\ORM\EntityManagerInterface;
@@ -19,6 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
 
 #[Route('/api/auth', name: 'api_auth_')]
 class AuthController extends AbstractController
@@ -34,6 +36,7 @@ class AuthController extends AbstractController
         private PasskeyAuthService $passkeyService,
         private UserRepository $userRepository,
         private AdminRepository $adminRepository,
+        private EmailVerifier $emailVerifier,
         private ValidatorInterface $validator
     ) {
     }
@@ -73,19 +76,31 @@ class AuthController extends AbstractController
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        $jwt = $this->jwtManager->create($user);
-        $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, self::REFRESH_TOKEN_TTL);
-        $this->refreshTokenManager->save($refreshToken);
+        try {
+            $this->emailVerifier->sendEmailConfirmation('api_auth_verify_email', $user);
+        } catch (\Throwable $exception) {
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+
+            return $this->json([
+                'error' => 'Impossible d envoyer l email de verification',
+                'message' => $exception->getMessage(),
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
 
         return $this->json([
             'success' => true,
-            'token' => $jwt,
-            'refresh_token' => $refreshToken->getRefreshToken(),
+            'message' => 'Compte cree. Verifiez votre boite email avant de vous connecter.',
+            'verification_sent' => true,
             'user' => [
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'is_verified' => $user->isVerified(),
             ],
+            'verification_url' => $this->getParameter('kernel.environment') !== 'prod'
+                ? $this->emailVerifier->getSignedUrl('api_auth_verify_email', $user)
+                : null,
         ], Response::HTTP_CREATED);
     }
 
@@ -108,6 +123,13 @@ class AuthController extends AbstractController
             ], Response::HTTP_UNAUTHORIZED);
         }
 
+        if (!$user->isVerified()) {
+            return $this->json([
+                'error' => 'Veuillez verifier votre adresse email avant de vous connecter',
+                'is_verified' => false,
+            ], Response::HTTP_FORBIDDEN);
+        }
+
         $jwt = $this->jwtManager->create($user);
         $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, self::REFRESH_TOKEN_TTL);
         $this->refreshTokenManager->save($refreshToken);
@@ -120,6 +142,7 @@ class AuthController extends AbstractController
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'is_verified' => $user->isVerified(),
             ],
         ]);
     }
@@ -166,6 +189,7 @@ class AuthController extends AbstractController
                 'id' => $user->getId(),
                 'email' => $user->getEmail(),
                 'roles' => $user->getRoles(),
+                'is_verified' => true,
                 'passkeys_count' => 0,
             ]);
         }
@@ -180,8 +204,35 @@ class AuthController extends AbstractController
             'id' => $user->getId(),
             'email' => $user->getEmail(),
             'roles' => $user->getRoles(),
+            'is_verified' => $user->isVerified(),
             'passkeys_count' => $user->getWebauthnCredentials()->count(),
         ]);
+    }
+
+    #[Route('/verify/email', name: 'verify_email', methods: ['GET'])]
+    public function verifyUserEmail(Request $request): Response
+    {
+        $id = $request->query->get('id');
+        if ($id === null) {
+            return $this->redirect('/?verified=missing');
+        }
+
+        $user = $this->userRepository->find((string) $id);
+        if (!$user instanceof User) {
+            return $this->redirect('/?verified=invalid');
+        }
+
+        if ($user->isVerified()) {
+            return $this->redirect('/?verified=already');
+        }
+
+        try {
+            $this->emailVerifier->handleEmailConfirmation($request, $user);
+        } catch (VerifyEmailExceptionInterface) {
+            return $this->redirect('/?verified=failed');
+        }
+
+        return $this->redirect('/?verified=success');
     }
 
     #[Route('/logout', name: 'logout', methods: ['POST'])]
@@ -234,6 +285,11 @@ class AuthController extends AbstractController
 
             $this->entityManager->persist($user);
             $this->entityManager->flush();
+
+            try {
+                $this->emailVerifier->sendEmailConfirmation('api_auth_verify_email', $user);
+            } catch (\Throwable) {
+            }
         }
 
         try {
@@ -302,6 +358,25 @@ class AuthController extends AbstractController
 
         try {
             $webauthnCredential = $verifier->verifyAndSaveRegistration($credential, $user);
+
+            if (!$user->isVerified()) {
+                return $this->json([
+                    'success' => true,
+                    'message' => 'Passkey enregistree. Verifiez maintenant votre email avant de vous connecter.',
+                    'verification_sent' => true,
+                    'user' => [
+                        'id' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'roles' => $user->getRoles(),
+                        'is_verified' => $user->isVerified(),
+                    ],
+                    'passkey' => [
+                        'id' => $webauthnCredential->getId(),
+                        'name' => $webauthnCredential->getName(),
+                    ],
+                ], Response::HTTP_CREATED);
+            }
+
             $jwt = $this->jwtManager->create($user);
             $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, self::REFRESH_TOKEN_TTL);
             $this->refreshTokenManager->save($refreshToken);
@@ -314,6 +389,7 @@ class AuthController extends AbstractController
                     'id' => $user->getId(),
                     'email' => $user->getEmail(),
                     'roles' => $user->getRoles(),
+                    'is_verified' => $user->isVerified(),
                 ],
                 'passkey' => [
                     'id' => $webauthnCredential->getId(),
@@ -370,6 +446,14 @@ class AuthController extends AbstractController
 
         try {
             $user = $verifier->verifyAssertion($credential);
+
+            if (!$user->isVerified()) {
+                return $this->json([
+                    'error' => 'Veuillez verifier votre adresse email avant de vous connecter',
+                    'is_verified' => false,
+                ], Response::HTTP_FORBIDDEN);
+            }
+
             $jwt = $this->jwtManager->create($user);
             $refreshToken = $this->refreshTokenGenerator->createForUserWithTtl($user, self::REFRESH_TOKEN_TTL);
             $this->refreshTokenManager->save($refreshToken);
@@ -382,6 +466,7 @@ class AuthController extends AbstractController
                     'id' => $user->getId(),
                     'email' => $user->getEmail(),
                     'roles' => $user->getRoles(),
+                    'is_verified' => $user->isVerified(),
                 ],
             ]);
         } catch (\Throwable $e) {

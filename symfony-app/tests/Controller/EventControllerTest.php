@@ -4,6 +4,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\Admin;
 use App\Entity\Event;
+use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -202,7 +203,18 @@ class EventControllerTest extends WebTestCase
 
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
-        return $this->getJsonResponse();
+        $user = $this->entityManager->getRepository(User::class)->findOneBy(['email' => $email]);
+        self::assertInstanceOf(User::class, $user);
+
+        $user->setIsVerified(true);
+        $this->entityManager->flush();
+
+        return [
+            'user' => [
+                'email' => $email,
+            ],
+            'token' => $this->jwtManager->create($user),
+        ];
     }
 
     private function createAdminToken(): string

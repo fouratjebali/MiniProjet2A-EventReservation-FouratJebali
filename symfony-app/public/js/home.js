@@ -6,10 +6,35 @@ let currentFilters = {
 
 document.addEventListener('DOMContentLoaded', async () => {
     setAuthUI(false);
+    handleEmailVerificationFeedback();
     await checkAuth();
     await loadEvents();
     setupFilters();
 });
+
+function handleEmailVerificationFeedback() {
+    const params = new URLSearchParams(window.location.search);
+    const state = params.get('verified');
+
+    if (!state) {
+        return;
+    }
+
+    const messages = {
+        success: ['Email verifie avec succes. Vous pouvez maintenant vous connecter.', 'success'],
+        already: ['Votre email est deja verifie. Vous pouvez vous connecter.', 'info'],
+        failed: ['Le lien de verification est invalide ou expire.', 'error'],
+        invalid: ['Le compte demande est introuvable.', 'error'],
+        missing: ['Le lien de verification est incomplet.', 'error'],
+    };
+
+    const [message, type] = messages[state] || ['Etat de verification inconnu.', 'warning'];
+    showToast(message, type);
+
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('verified');
+    window.history.replaceState({}, '', cleanUrl);
+}
 
 function setAuthUI(isAuthenticated, email = '') {
     document.getElementById('authButtons').style.display = isAuthenticated ? 'none' : 'flex';
@@ -322,9 +347,8 @@ async function handleRegister(event) {
         const { ok, data } = await api.register(email, password);
 
         if (ok) {
-            showToast('Inscription reussie ! Bienvenue !', 'success');
+            showToast(data?.message || 'Inscription reussie. Verifiez maintenant votre email.', 'success');
             closeRegisterModal();
-            setTimeout(() => location.reload(), 500);
             return;
         }
 

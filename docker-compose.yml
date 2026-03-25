@@ -11,6 +11,7 @@ services:
       - ./symfony-app:/var/www
     depends_on:
       - db
+      - mailpit
     networks:
       - app_network
 
@@ -38,6 +39,18 @@ services:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    networks:
+      - app_network
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: symfony_mailpit
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
     networks:
       - app_network
 

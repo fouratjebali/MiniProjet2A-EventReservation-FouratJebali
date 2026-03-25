@@ -31,6 +31,7 @@ class AppFixtures extends Fixture
             $user->setEmail("user{$i}@test.com");
             $user->setRoles(['ROLE_USER']);
             $user->setPassword($this->passwordHasher->hashPassword($user, 'user123'));
+            $user->setIsVerified(true);
             $manager->persist($user);
             $users[] = $user;
         }

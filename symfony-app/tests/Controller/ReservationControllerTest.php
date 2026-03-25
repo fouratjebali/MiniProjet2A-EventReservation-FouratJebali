@@ -233,11 +233,13 @@ class ReservationControllerTest extends WebTestCase
         ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
-        $response = $this->getJsonResponse();
+        $user = $this->findUserByEmail($email);
+        $user->setIsVerified(true);
+        $this->entityManager->flush();
 
         return [
             'email' => $email,
-            'token' => $response['token'],
+            'token' => $this->jwtManager->create($user),
         ];
     }
 
