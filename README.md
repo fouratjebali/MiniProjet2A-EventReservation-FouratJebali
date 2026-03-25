@@ -148,6 +148,8 @@ Quick manual flow:
 7. Create a reservation
 8. Open `http://localhost:8025` and verify the reservation confirmation email
 9. Open `http://localhost:8080/my-reservations.html` and verify it appears
+10. Cancel the reservation
+11. Open `http://localhost:8025` and verify the cancellation email
 
 Important:
 
@@ -181,7 +183,11 @@ docker compose exec php php bin/phpunit
 
 Latest verified result:
 
-- `OK (27 tests, 117 assertions)`
+- `OK (29 tests, 143 assertions)`
+
+Current note:
+
+- the full suite is green, with 2 existing VichUploader deprecation notices coming from legacy annotation classes in the event upload mapping
 
 ## Notes
 
