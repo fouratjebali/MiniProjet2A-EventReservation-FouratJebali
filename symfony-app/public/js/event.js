@@ -250,7 +250,16 @@ async function handleReservation(event) {
 }
 
 async function handleLogout() {
-    if (confirm('Etes-vous sur de vouloir vous deconnecter ?')) {
+    const shouldLogout = await showConfirmDialog({
+        title: 'Deconnexion',
+        message: 'Etes-vous sur de vouloir vous deconnecter ?',
+        confirmText: 'Oui, me deconnecter',
+        cancelText: 'Rester connecte',
+        confirmVariant: 'error',
+        icon: 'fa-right-from-bracket',
+    });
+
+    if (shouldLogout) {
         await api.logout();
     }
 }

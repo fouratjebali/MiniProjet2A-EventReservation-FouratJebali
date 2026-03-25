@@ -324,7 +324,14 @@ function createEventRow(event) {
 }
 
 async function handleLogout() {
-    const shouldLogout = confirm('Etes-vous sur de vouloir vous deconnecter ?');
+    const shouldLogout = await showConfirmDialog({
+        title: 'Deconnexion admin',
+        message: 'Etes-vous sur de vouloir fermer votre session administrateur ?',
+        confirmText: 'Oui, me deconnecter',
+        cancelText: 'Rester ici',
+        confirmVariant: 'error',
+        icon: 'fa-user-shield',
+    });
 
     if (shouldLogout) {
         await api.logout('/admin/');

@@ -66,6 +66,78 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
+function showConfirmDialog({
+    title = 'Confirmation',
+    message = 'Voulez-vous continuer ?',
+    confirmText = 'Confirmer',
+    cancelText = 'Annuler',
+    confirmVariant = 'primary',
+    icon = 'fa-circle-question',
+} = {}) {
+    return new Promise((resolve) => {
+        const overlay = document.createElement('div');
+        overlay.className = 'confirm-overlay';
+
+        const dialog = document.createElement('div');
+        dialog.className = 'confirm-dialog';
+        dialog.setAttribute('role', 'dialog');
+        dialog.setAttribute('aria-modal', 'true');
+        dialog.setAttribute('aria-labelledby', 'confirm-dialog-title');
+
+        dialog.innerHTML = `
+            <div class="confirm-dialog__header">
+                <div class="confirm-dialog__icon">
+                    <i class="fas ${icon}"></i>
+                </div>
+                <div>
+                    <h3 id="confirm-dialog-title" class="confirm-dialog__title">${title}</h3>
+                    <p class="confirm-dialog__message">${message}</p>
+                </div>
+            </div>
+            <div class="confirm-dialog__actions">
+                <button type="button" class="btn btn-secondary confirm-dialog__button" data-action="cancel">
+                    ${cancelText}
+                </button>
+                <button type="button" class="btn btn-${confirmVariant} confirm-dialog__button" data-action="confirm">
+                    ${confirmText}
+                </button>
+            </div>
+        `;
+
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+        document.body.classList.add('confirm-dialog-open');
+
+        const confirmButton = dialog.querySelector('[data-action="confirm"]');
+        const cancelButton = dialog.querySelector('[data-action="cancel"]');
+
+        function cleanup(result) {
+            document.removeEventListener('keydown', onKeyDown);
+            document.body.classList.remove('confirm-dialog-open');
+            overlay.remove();
+            resolve(result);
+        }
+
+        function onKeyDown(event) {
+            if (event.key === 'Escape') {
+                cleanup(false);
+            }
+        }
+
+        overlay.addEventListener('click', (event) => {
+            if (event.target === overlay) {
+                cleanup(false);
+            }
+        });
+
+        cancelButton?.addEventListener('click', () => cleanup(false));
+        confirmButton?.addEventListener('click', () => cleanup(true));
+        document.addEventListener('keydown', onKeyDown);
+
+        confirmButton?.focus();
+    });
+}
+
 function showLoading(element, text = 'Chargement...') {
     element.replaceChildren();
 
