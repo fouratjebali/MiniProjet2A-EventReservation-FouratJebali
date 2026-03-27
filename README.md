@@ -194,3 +194,50 @@ Current note:
 - run Symfony, Composer, Doctrine, and PHPUnit commands inside the `php` container
 - the project is configured for PostgreSQL, so local host PHP without `pdo_pgsql` will fail on Composer or Doctrine commands
 - JWT private and public keys are ignored in [symfony-app/config/jwt/.gitignore](/Users/Fuuurat/Desktop/php-symphony/MiniProjet2A-EventReservation-FouratJebali/symfony-app/config/jwt/.gitignore)
+
+## Screenshots
+
+### User Interface
+
+#### Main Page
+
+![Main page](screenshots/mainPage.png)
+
+#### Registration
+
+![Registration](screenshots/inscription.png)
+
+#### Login
+
+![Login](screenshots/connexion.png)
+
+#### Reservation Form
+
+![Reservation form](screenshots/formulaireReservation.png)
+
+#### Reservation Success
+
+![Reservation success](screenshots/reservation.png)
+
+#### Email Verification Sent
+
+![Email verification sent](screenshots/emailConfirmationenvoyee.png)
+
+### Admin Interface
+
+#### Admin Login
+
+![Admin login](screenshots/adminMainPage.png)
+
+#### Admin Dashboard
+
+![Admin dashboard](screenshots/dashboardadmin.png)
+
+#### Event Management
+
+![Event management](screenshots/gestionevent.png)
+
+#### Reservations Per Event
+
+![Reservations per event](screenshots/listeReservationParevent.png)
+

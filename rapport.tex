@@ -1,0 +1,525 @@
+\documentclass[12pt,a4paper]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{float}
+
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+% Configuration des listings pour le code
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+}
+
+% En-têtes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% Configuration des titres de chapitres
+\titleformat{\chapter}[display]
+{\normalfont\huge\bfseries}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+
+\begin{document}
+
+% ----------------------------------------------------------
+% PAGE DE GARDE
+% ----------------------------------------------------------
+\begin{titlepage}
+    \centering
+    
+    \begin{minipage}[t]{0.45\textwidth}
+        \raggedright
+        \footnotesize
+        \textbf{République Tunisienne}\\
+        \textbf{Ministère de l'Enseignement}\\
+        \textbf{Supérieur et de la Recherche}\\
+        \textbf{Scientifique}\\
+        \textbf{Université de Sousse}
+        \vspace{0.8cm}
+        \centering
+        \includegraphics[width=3.5cm]{logo-Uso.jpg}
+    \end{minipage}%
+    \hfill
+    \begin{minipage}[t]{0.45\textwidth}
+        \raggedleft
+        \footnotesize
+        \textbf{Institut Supérieur des}\\
+        \textbf{Sciences Appliquées et}\\
+        \textbf{de Technologie de Sousse}\\
+        \vspace{1cm}
+        \centering
+        \includegraphics[width=4.5cm]{issat.png}
+    \end{minipage}
+    
+    \vspace{2cm}
+    
+    {\large \textbf{Département Informatique}}
+    
+    \vspace{2.5cm}
+    
+    {\Large \textbf{\textit{RAPPORT DE MINI PROJET}}}\\[0.8cm]
+    {\Large \textbf{\textit{Développement Web}}}\\[0.5cm]
+    {\large \textbf{\textit{ING-A2-GL}}}
+    
+    \vspace{2cm}
+    
+    {\Huge \textbf{\textit{Application Web de Gestion de}}}\\[0.5cm]
+    {\Huge \textbf{\textit{Réservations d'Événements}}}\\[0.3cm]
+    
+    \vfill
+    
+    \begin{flushleft}
+        \hspace{1.5cm}
+        \textbf{Préparé par :}\\[0.3cm]
+        \hspace{3cm} Fourat Jebali
+    \end{flushleft}
+    
+    \vspace{1cm}
+    
+    \textbf{Année Universitaire : 2025 / 2026}
+\end{titlepage}
+
+% ----------------------------------------------------------
+% SOMMAIRE
+% ----------------------------------------------------------
+\pagenumbering{roman}
+\tableofcontents
+\clearpage
+
+% ----------------------------------------------------------
+% INTRODUCTION
+% ----------------------------------------------------------
+\pagenumbering{arabic}
+\chapter*{Introduction}
+\addcontentsline{toc}{chapter}{Introduction}
+
+Ce rapport présente le mini-projet sous un angle principalement technique. L'application réalisée est une plateforme web de gestion de réservations d'événements avec un backend Symfony, une base PostgreSQL exécutée dans Docker, un frontend public, un frontend administrateur, ainsi que plusieurs mécanismes de sécurité modernes.
+
+L'objectif du document est de mettre en évidence les points réellement implémentés : architecture, conteneurisation, utilisation de PostgreSQL, dépendances majeures, organisation frontend/backend, sécurité, fonctionnalités métier et validation technique.
+
+% ----------------------------------------------------------
+% CHAPITRE 1
+% ----------------------------------------------------------
+\chapter{Vue d'ensemble du projet}
+
+\section{Objectif général}
+
+Le projet a pour but de fournir une application permettant :
+\begin{itemize}[leftmargin=1.2cm]
+    \item la consultation publique des événements ;
+    \item la gestion de comptes utilisateurs ;
+    \item la réservation et l'annulation de places ;
+    \item l'administration du contenu ;
+    \item l'exposition d'une API REST sécurisée.
+\end{itemize}
+
+\section{Profils gérés par le système}
+
+\subsection{Visiteur}
+\begin{itemize}[leftmargin=1.2cm]
+    \item voir la liste des événements ;
+    \item consulter la fiche détaillée d'un événement ;
+    \item accéder aux interfaces d'inscription et de connexion.
+\end{itemize}
+
+\subsection{Utilisateur}
+\begin{itemize}[leftmargin=1.2cm]
+    \item créer un compte ;
+    \item vérifier son email ;
+    \item se connecter ;
+    \item réserver un événement ;
+    \item consulter ses réservations ;
+    \item annuler une réservation ;
+    \item recevoir des emails de notification.
+\end{itemize}
+
+\subsection{Administrateur}
+\begin{itemize}[leftmargin=1.2cm]
+    \item se connecter via un espace admin dédié ;
+    \item accéder à un dashboard ;
+    \item créer, modifier et supprimer des événements ;
+    \item téléverser des images ;
+    \item consulter les réservations d'un événement.
+\end{itemize}
+
+\section{Fonctionnalités livrées}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item authentification JWT ;
+    \item refresh tokens ;
+    \item vérification d'email ;
+    \item base fonctionnelle WebAuthn / passkeys ;
+    \item gestion d'événements côté admin ;
+    \item gestion des réservations côté user ;
+    \item emails de confirmation et d'annulation ;
+    \item interfaces frontend publique et admin ;
+    \item tests backend automatisés.
+\end{itemize}
+
+% ----------------------------------------------------------
+% CHAPITRE 2
+% ----------------------------------------------------------
+\chapter{Environnement technique et outillage}
+
+\section{Technologies utilisées}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item \textbf{Symfony 7.4} : framework backend ;
+    \item \textbf{PHP 8.4} : logique serveur ;
+    \item \textbf{PostgreSQL 15} : base de données relationnelle ;
+    \item \textbf{Docker Compose} : orchestration des services ;
+    \item \textbf{Nginx} : serveur web ;
+    \item \textbf{HTML / CSS / JavaScript} : frontend ;
+    \item \textbf{Mailpit} : test d'emails en local ;
+    \item \textbf{Git / GitHub} : gestion de versions.
+\end{itemize}
+
+\section{Utilisation de Docker}
+
+Tout le projet est exécuté dans des conteneurs, ce qui a permis d'avoir un environnement de développement stable et reproductible.
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{php} : exécution de Symfony, Composer, PHPUnit et commandes console ;
+    \item \texttt{nginx} : exposition du frontend et de l'API ;
+    \item \texttt{db} : instance PostgreSQL ;
+    \item \texttt{mailpit} : réception locale des emails.
+\end{itemize}
+
+\begin{lstlisting}[language=bash,caption={Commandes principales utilisées pendant le développement}]
+docker compose up --build -d
+docker compose exec php composer install
+docker compose exec php php bin/console doctrine:migrations:migrate --no-interaction
+docker compose exec php php bin/console doctrine:fixtures:load --no-interaction
+docker compose exec php php bin/phpunit
+\end{lstlisting}
+
+\section{Utilisation de PostgreSQL dans le conteneur}
+
+La base PostgreSQL est exécutée dans le conteneur \texttt{db}. Symfony s'y connecte via la variable \texttt{DATABASE\_URL}. PostgreSQL a été utilisé pour stocker l'ensemble des données métier :
+\begin{itemize}[leftmargin=1.2cm]
+    \item utilisateurs ;
+    \item administrateurs ;
+    \item événements ;
+    \item réservations ;
+    \item refresh tokens ;
+    \item credentials WebAuthn.
+\end{itemize}
+
+L'utilisation de PostgreSQL dans Docker a aussi servi à :
+\begin{itemize}[leftmargin=1.2cm]
+    \item appliquer les migrations Doctrine ;
+    \item charger les fixtures ;
+    \item isoler une base de test pour PHPUnit.
+\end{itemize}
+
+\section{Utilisation de Git et GitHub}
+
+Le projet a été suivi avec Git selon une logique par branches. Les travaux ont ensuite été poussés sur GitHub.
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item création de branches fonctionnelles ;
+    \item commits thématiques du type \texttt{feat: ...} ;
+    \item synchronisation avec la branche \texttt{dev} ;
+    \item push et sauvegarde du travail sur GitHub ;
+    \item historique clair des évolutions backend, frontend et documentation.
+\end{itemize}
+
+% ----------------------------------------------------------
+% CHAPITRE 3
+% ----------------------------------------------------------
+\chapter{Architecture logicielle}
+
+\section{Architecture générale}
+
+Le projet est séparé en plusieurs couches :
+\begin{itemize}[leftmargin=1.2cm]
+    \item \textbf{frontend public} ;
+    \item \textbf{frontend admin} ;
+    \item \textbf{API Symfony} ;
+    \item \textbf{base PostgreSQL} ;
+    \item \textbf{services d'infrastructure} : Nginx, PHP, Mailpit.
+\end{itemize}
+
+\section{Architecture backend}
+
+\subsection{Contrôleurs}
+\begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{AuthController} : inscription, login user, login admin, email verification, profil courant, flux passkeys ;
+    \item \texttt{EventController} : lecture publique et gestion admin des événements ;
+    \item \texttt{ReservationController} : création, annulation, consultation user et consultation admin.
+\end{itemize}
+
+\subsection{Entités métier}
+\begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{User} ;
+    \item \texttt{Admin} ;
+    \item \texttt{Event} ;
+    \item \texttt{Reservation} ;
+    \item \texttt{RefreshToken} ;
+    \item \texttt{WebauthnCredential}.
+\end{itemize}
+
+\subsection{Services}
+\begin{itemize}[leftmargin=1.2cm]
+    \item \texttt{EmailVerifier} ;
+    \item \texttt{ReservationEmailNotifier} ;
+    \item services liés aux passkeys / WebAuthn.
+\end{itemize}
+
+\section{Architecture frontend}
+
+Le frontend a été développé sans framework JavaScript afin de garder une structure simple, lisible et maîtrisée.
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item pages publiques : \texttt{index.html}, \texttt{event.html}, \texttt{my-reservations.html} ;
+    \item pages admin : \texttt{/admin}, \texttt{dashboard.html}, \texttt{event.html}, \texttt{reservations.html} ;
+    \item \texttt{api.js} : couche d'appel vers l'API ;
+    \item \texttt{utils.js} : utilitaires frontend, formatage, modales ;
+    \item scripts de page : \texttt{home.js}, \texttt{event.js}, \texttt{my-reservations.js}, \texttt{dashboard.js}, \texttt{events.js}, \texttt{reservations.js}.
+\end{itemize}
+
+\section{Flux technique global}
+
+\begin{enumerate}[leftmargin=1.2cm]
+    \item Nginx sert les pages statiques ;
+    \item le JavaScript appelle l'API Symfony ;
+    \item Symfony applique validation, sécurité et logique métier ;
+    \item Doctrine enregistre les données dans PostgreSQL ;
+    \item le frontend met à jour l'interface à partir du JSON retourné ;
+    \item Symfony Mailer envoie les emails si nécessaire.
+\end{enumerate}
+
+% ----------------------------------------------------------
+% CHAPITRE 4
+% ----------------------------------------------------------
+\chapter{Dépendances majeures du projet}
+
+\section{Dépendances backend}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item \textbf{Doctrine ORM} : mapping objet / relationnel ;
+    \item \textbf{Doctrine Migrations} : gestion du schéma SQL ;
+    \item \textbf{LexikJWTAuthenticationBundle} : génération et validation des JWT ;
+    \item \textbf{Gesdinet JWT Refresh Token Bundle} : gestion des refresh tokens ;
+    \item \textbf{Symfony VerifyEmail Bundle} : génération des liens signés ;
+    \item \textbf{Symfony Mailer} : envoi des emails ;
+    \item \textbf{WebAuthn Bundle} : gestion des passkeys ;
+    \item \textbf{VichUploaderBundle} : upload de fichiers ;
+    \item \textbf{LiipImagineBundle} : optimisation de l'affichage des images.
+\end{itemize}
+
+\section{Dépendances frontend}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item \textbf{Font Awesome} : icônes ;
+    \item \textbf{Google Fonts} : typographie ;
+    \item \textbf{Chart.js} : dashboard admin.
+\end{itemize}
+
+\section{Intérêt de ces dépendances}
+
+Ces dépendances ont permis d'aller plus vite sur des briques complexes et sensibles, en particulier :
+\begin{itemize}[leftmargin=1.2cm]
+    \item la sécurité JWT ;
+    \item la vérification d'email ;
+    \item l'intégration WebAuthn ;
+    \item l'upload et l'affichage d'images.
+\end{itemize}
+
+% ----------------------------------------------------------
+% CHAPITRE 5
+% ----------------------------------------------------------
+\chapter{Fonctionnalités implémentées}
+
+\section{Fonctionnalités backend}
+
+\subsection{Authentification}
+\begin{itemize}[leftmargin=1.2cm]
+    \item inscription utilisateur ;
+    \item connexion utilisateur ;
+    \item connexion administrateur ;
+    \item endpoint \texttt{/api/auth/me} ;
+    \item génération d'un JWT ;
+    \item génération et stockage du refresh token.
+\end{itemize}
+
+\subsection{Vérification d'email}
+\begin{itemize}[leftmargin=1.2cm]
+    \item création du compte avec \texttt{isVerified = false} ;
+    \item envoi d'un email de vérification ;
+    \item validation via un lien signé ;
+    \item activation du compte après clic sur le lien ;
+    \item blocage de la connexion tant que le compte n'est pas vérifié.
+\end{itemize}
+
+\subsection{Passkeys}
+\begin{itemize}[leftmargin=1.2cm]
+    \item génération des options d'enregistrement ;
+    \item vérification d'enregistrement ;
+    \item génération des options de connexion ;
+    \item vérification d'assertion ;
+    \item stockage des credentials WebAuthn.
+\end{itemize}
+
+\subsection{Événements}
+\begin{itemize}[leftmargin=1.2cm]
+    \item listing public ;
+    \item détail d'un événement ;
+    \item création admin ;
+    \item modification admin ;
+    \item suppression admin ;
+    \item upload d'image ;
+    \item calcul des places disponibles.
+\end{itemize}
+
+\subsection{Réservations}
+\begin{itemize}[leftmargin=1.2cm]
+    \item création ;
+    \item annulation ;
+    \item consultation des réservations personnelles ;
+    \item consultation admin par événement ;
+    \item contrôle des doublons ;
+    \item contrôle des événements inexistants ou passés ;
+    \item contrôle des places restantes.
+\end{itemize}
+
+\subsection{Emails}
+\begin{itemize}[leftmargin=1.2cm]
+    \item email de vérification de compte ;
+    \item email de confirmation de réservation ;
+    \item email d'annulation de réservation ;
+    \item envoi robuste sans bloquer l'action métier en cas d'échec.
+\end{itemize}
+
+\section{Fonctionnalités frontend utilisateur}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item page d'accueil dynamique ;
+    \item affichage des cartes d'événements avec images ;
+    \item page détail d'événement ;
+    \item modales de connexion et d'inscription ;
+    \item page \texttt{my-reservations} ;
+    \item messages de succès / erreur ;
+    \item popups modernes de confirmation ;
+    \item interface adaptée à l'état de connexion.
+\end{itemize}
+
+\section{Fonctionnalités frontend administrateur}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item page de login admin ;
+    \item dashboard avec statistiques ;
+    \item page de gestion des événements ;
+    \item page de consultation des réservations ;
+    \item formulaires d'ajout / édition ;
+    \item tableaux, filtres et actions rapides ;
+    \item cohérence visuelle avec le frontend user.
+\end{itemize}
+
+% ----------------------------------------------------------
+% CHAPITRE 6
+% ----------------------------------------------------------
+\chapter{Sécurité implémentée}
+
+\section{Authentification et autorisation}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item authentification par JWT ;
+    \item refresh tokens ;
+    \item séparation \texttt{ROLE\_USER} / \texttt{ROLE\_ADMIN} ;
+    \item protection des routes via \texttt{security.yaml} ;
+    \item contrôle des accès admin ;
+    \item contrôle des routes de réservation.
+\end{itemize}
+
+\section{Vérification d'identité}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item vérification obligatoire de l'email avant connexion ;
+    \item génération de liens signés ;
+    \item activation conditionnelle du compte.
+\end{itemize}
+
+\section{Passkeys / WebAuthn}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item usage de cryptographie asymétrique ;
+    \item aucune biométrie stockée côté serveur ;
+    \item alignement avec les standards WebAuthn / FIDO2 ;
+    \item meilleure résistance au phishing.
+\end{itemize}
+
+\section{Validation des données et uploads}
+
+\begin{itemize}[leftmargin=1.2cm]
+    \item validation Symfony sur les entités ;
+    \item contrôle des emails, téléphones, dates et places ;
+    \item validation des images uploadées ;
+    \item contrôle du type MIME et de la taille des fichiers.
+\end{itemize}
+
+% ----------------------------------------------------------
+% CHAPITRE 7
+% ----------------------------------------------------------
+\chapter{Tests et validation}
+
+\section{Tests backend automatisés}
+
+Une suite PHPUnit a été utilisée pour valider les principaux parcours :
+\begin{itemize}[leftmargin=1.2cm]
+    \item inscription et connexion ;
+    \item vérification d'email ;
+    \item accès au profil ;
+    \item création et gestion des événements ;
+    \item création et annulation de réservations ;
+    \item accès admin aux réservations ;
+    \item services passkeys.
+\end{itemize}
+
+Le résultat final vérifié est :
+\begin{center}
+    \textbf{29 tests et 143 assertions}
+\end{center}
+
+\section{Validation fonctionnelle manuelle}
+
+Des vérifications manuelles ont aussi été réalisées sur :
+\begin{itemize}[leftmargin=1.2cm]
+    \item le parcours d'inscription et de vérification d'email ;
+    \item le login user et admin ;
+    \item les emails envoyés via Mailpit puis SMTP ;
+    \item les pages frontend publiques ;
+    \item les interfaces admin ;
+    \item les flux de réservation et d'annulation.
+\end{itemize}
+
+% ----------------------------------------------------------
+% CONCLUSION
+% ----------------------------------------------------------
+\chapter*{Conclusion}
+\addcontentsline{toc}{chapter}{Conclusion}
+
+Ce mini-projet m'a permis de réaliser une application web complète en travaillant à la fois le backend Symfony, la base PostgreSQL, l'environnement Docker, Git/GitHub, la sécurité, les emails, les tests et les interfaces frontend. Le résultat obtenu est cohérent sur le plan technique et constitue une base solide pour des évolutions futures comme la réinitialisation de mot de passe, l'export de données ou l'enrichissement du parcours passkeys.
+
+\end{document}
